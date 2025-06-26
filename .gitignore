@@ -1,15 +1,35 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# .env file
-.env
-!packages/prisma/.env
-
-# dependencies
+# Node.js
 node_modules
-.pnp
-.pnp.js
+dist
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
 
-# testing
+# Build outputs
+.next/
+out/
+build
+.turbo
+
+# Local dev environment files
+.env
+.env.*
+!.env.example
+!.env.appStore.example
+packages/prisma/.env
+
+# IDEs & editor junk
+.DS_Store
+.idea
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# Testing & coverage
 coverage
 /test-results/
 **/playwright/videos
@@ -18,77 +38,26 @@ coverage
 **/playwright/results
 **/playwright/reports/*
 
-# next.js
-.next/
-out/
-build
-
-# misc
-.DS_Store
+# Misc
 *.pem
-
-# debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
-
-# local env files
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-.env.*
-!.env.example
-!.env.appStore.example
-
-# vercel
-.vercel
-
-# Webstorm
-.idea
-
-### VisualStudioCode template
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-*.code-workspace
-
-# Local History for Visual Studio Code
-.history/
-
-# Typescript
 tsconfig.tsbuildinfo
+.history/
+i18n.cache
 
-# turbo
-.turbo
-
-# Prisma generated files
+# Prisma output
 packages/prisma/zod/*.ts
 packages/prisma/enums
 
-# Builds
-dist
-
-# Linting
-lint-results
-
-#Storybook
-apps/storybook/build-storybook.log
+# Vercel
+.vercel
 
 # Snaplet
 .snaplet/snapshots
 .snaplet/structure.d.ts
 
-# Submodules
-.gitmodules
-apps/website
-apps/console
-apps/auth
-
-# Yarn Modern
+# Yarn PnP (modern)
+.pnp
+.pnp.js
 .pnp.*
 .yarn/*
 !.yarn/patches
@@ -96,4 +65,8 @@ apps/auth
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
-i18n.cache
+
+# Git submodules (optional — only if you're excluding these apps)
+# apps/website
+# apps/console
+# apps/auth
