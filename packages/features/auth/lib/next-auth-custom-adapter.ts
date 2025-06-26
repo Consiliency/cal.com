@@ -1,12 +1,14 @@
 import type { Account, IdentityProvider, Prisma, User, VerificationToken } from "@prisma/client";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import type { Adapter } from "next-auth/adapters";
 
 import type { PrismaClient } from "@calcom/prisma";
 
 import { identityProviderNameMap } from "./identityProviderNameMap";
 
 /** @return { import("next-auth/adapters").Adapter } */
-export default function CalComAdapter(prismaClient: PrismaClient) {
+
+export default function CalComAdapter(prismaClient: PrismaClient): Adapter {
   return {
     createUser: (data: Prisma.UserCreateInput) => prismaClient.user.create({ data }),
     getUser: (id: string | number) =>
