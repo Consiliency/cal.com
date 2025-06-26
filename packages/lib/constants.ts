@@ -123,8 +123,20 @@ export const FULL_NAME_LENGTH_MAX_LIMIT = 50;
 export const MINUTES_TO_BOOK = process.env.NEXT_PUBLIC_MINUTES_TO_BOOK || "5";
 export const ENABLE_PROFILE_SWITCHER = process.env.NEXT_PUBLIC_ENABLE_PROFILE_SWITCHER === "1";
 // Needed for orgs
-export const ALLOWED_HOSTNAMES = JSON.parse(`[${process.env.ALLOWED_HOSTNAMES || ""}]`) as string[];
-export const RESERVED_SUBDOMAINS = JSON.parse(`[${process.env.RESERVED_SUBDOMAINS || ""}]`) as string[];
+export const ALLOWED_HOSTNAMES = (() => {
+  try {
+    return JSON.parse(`[${process.env.ALLOWED_HOSTNAMES || ""}]`) as string[];
+  } catch {
+    return [] as string[];
+  }
+})();
+export const RESERVED_SUBDOMAINS = (() => {
+  try {
+    return JSON.parse(`[${process.env.RESERVED_SUBDOMAINS || ""}]`) as string[];
+  } catch {
+    return [] as string[];
+  }
+})();
 
 export const ORGANIZATION_SELF_SERVE_MIN_SEATS = parseInt(
   process.env.NEXT_PUBLIC_ORGANIZATIONS_MIN_SELF_SERVE_SEATS || "5"
@@ -165,7 +177,11 @@ export const MAX_NB_INVITES = 100;
 
 export const URL_PROTOCOL_REGEX = /(^\w+:|^)\/\//;
 
-export const IS_VISUAL_REGRESSION_TESTING = Boolean(globalThis.window?.Meticulous?.isRunningAsTest);
+export const IS_VISUAL_REGRESSION_TESTING = Boolean(
+  typeof globalThis !== "undefined" &&
+    globalThis.window &&
+    (globalThis.window as any)?.Meticulous?.isRunningAsTest
+);
 
 export const BOOKER_NUMBER_OF_DAYS_TO_LOAD = parseInt(
   process.env.NEXT_PUBLIC_BOOKER_NUMBER_OF_DAYS_TO_LOAD ?? "0",
