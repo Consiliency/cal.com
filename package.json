@@ -120,6 +120,7 @@
     "city-timezones": "^1.2.1",
     "eslint": "^8.34.0",
     "p-limit": "^6.2.0",
+    "pg": "^8.16.2",
     "turbo": "^1.10.1"
   },
   "resolutions": {
