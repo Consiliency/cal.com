@@ -675,3 +675,4 @@ Special thanks to these amazing projects which help power Cal.com:
 Cal.com is an [open startup](https://cal.com/open) and [Jitsu](https://github.com/jitsucom/jitsu) (an open-source Segment alternative) helps us to track most of the usage metrics.
 # Trigger redeploy
 // Trigger deployment - Fri Jun 27 02:21:20 EDT 2025
+// Trigger deployment with both DATABASE_URL and DATABASE_DIRECT_URL set - Fri Jun 27 02:40:18 EDT 2025
