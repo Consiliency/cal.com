@@ -39,6 +39,7 @@ async function main(): Promise<void> {
   const { stdout, stderr } = await exec("yarn prisma migrate deploy", {
     env: {
       ...process.env,
+      DATABASE_URL: process.env.DATABASE_DIRECT_URL, // Use direct URL for migrations
     },
   });
   console.log("Migrate deploy stdout:", stdout);
