@@ -71,6 +71,12 @@ export class CalendarAuth {
     }
     log.debug("Creating new oAuthClient");
     const { client_id, client_secret, redirect_uris } = await getGoogleAppKeys();
+    // TODO: Remove debug logging after debugging
+    console.log("[Cal.com DEBUG] CalendarAuth.getOAuthClientSingleton keys:", {
+      client_id,
+      client_secret,
+      redirect_uris,
+    });
     const googleCredentials = OAuth2UniversalSchema.parse(this.credential.key);
     this.oAuthClient = new MyGoogleOAuth2Client(client_id, client_secret, redirect_uris[0]);
     this.oAuthClient.setCredentials(googleCredentials);
