@@ -49,8 +49,13 @@ async function postHandler(req: NextRequest) {
   }
 
   if (!process.env.CALENDSO_ENCRYPTION_KEY) {
-    console.error("Missing encryption key; cannot proceed with two factor setup.");
-    return NextResponse.json({ error: ErrorCode.InternalServerError }, { status: 500 });
+    console.error("[Cal.com DEBUG] CALENDSO_ENCRYPTION_KEY is missing!");
+  } else {
+    console.log("[Cal.com DEBUG] CALENDSO_ENCRYPTION_KEY:", process.env.CALENDSO_ENCRYPTION_KEY);
+    console.log(
+      "[Cal.com DEBUG] CALENDSO_ENCRYPTION_KEY length:",
+      process.env.CALENDSO_ENCRYPTION_KEY.length
+    );
   }
 
   const isCorrectPassword = await verifyPassword(body.password, user.password.hash);
