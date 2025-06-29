@@ -9,8 +9,5 @@ const googleAppKeysSchema = z.object({
 });
 
 export const getGoogleAppKeys = async () => {
-  const keys = await getParsedAppKeysFromSlug("google-calendar", googleAppKeysSchema);
-  // TODO: Remove debug logging after debugging
-  console.log("[Cal.com DEBUG] getGoogleAppKeys parsed keys:", keys);
-  return keys;
+  return getParsedAppKeysFromSlug("google-calendar", googleAppKeysSchema);
 };

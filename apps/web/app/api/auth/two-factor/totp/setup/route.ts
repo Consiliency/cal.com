@@ -49,13 +49,7 @@ async function postHandler(req: NextRequest) {
   }
 
   if (!process.env.CALENDSO_ENCRYPTION_KEY) {
-    console.error("[Cal.com DEBUG] CALENDSO_ENCRYPTION_KEY is missing!");
-  } else {
-    console.log("[Cal.com DEBUG] CALENDSO_ENCRYPTION_KEY:", process.env.CALENDSO_ENCRYPTION_KEY);
-    console.log(
-      "[Cal.com DEBUG] CALENDSO_ENCRYPTION_KEY length:",
-      process.env.CALENDSO_ENCRYPTION_KEY.length
-    );
+    return NextResponse.json({ error: "Encryption key not configured" }, { status: 500 });
   }
 
   const isCorrectPassword = await verifyPassword(body.password, user.password.hash);
