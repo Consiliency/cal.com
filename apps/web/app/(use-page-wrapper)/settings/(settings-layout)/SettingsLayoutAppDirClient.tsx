@@ -728,6 +728,7 @@ export type SettingsLayoutProps = {
 
 export default function SettingsLayoutAppDirClient({ children, ...rest }: SettingsLayoutProps) {
   const pathname = usePathname();
+  const searchParams = useCompatSearchParams();
   const state = useState(false);
   const [sideContainerOpen, setSideContainerOpen] = state;
 
