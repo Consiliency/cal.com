@@ -121,7 +121,6 @@ export default function CancelBooking(props: Props) {
 
   const cancelBookingRef = useCallback((node: HTMLTextAreaElement) => {
     if (node !== null) {
-      // eslint-disable-next-line @calcom/eslint/no-scroll-into-view-embed -- CancelBooking is not usually used in embed mode
       node.scrollIntoView({ behavior: "smooth" });
       node.focus();
     }

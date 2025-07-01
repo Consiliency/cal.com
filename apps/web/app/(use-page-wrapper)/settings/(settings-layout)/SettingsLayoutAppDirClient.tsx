@@ -291,7 +291,6 @@ const TeamListCollapsible = () => {
         const tabMembers = Array.from(document.getElementsByTagName("a")).filter(
           (bottom) => bottom.dataset.testid === "vertical-tab-Members"
         )[1];
-        // eslint-disable-next-line @calcom/eslint/no-scroll-into-view-embed -- Settings layout isn't embedded
         tabMembers?.scrollIntoView({ behavior: "smooth" });
       }, 100);
     }
@@ -469,11 +468,9 @@ const SettingsSidebarContainer = ({
       }));
       setOtherTeamMenuState(otherTeamStates);
       setTimeout(() => {
-        // @TODO: test if this works for 2 dataset testids
         const tabMembers = Array.from(document.getElementsByTagName("a")).filter(
           (bottom) => bottom.dataset.testid === "vertical-tab-Members"
         )[1];
-        // eslint-disable-next-line @calcom/eslint/no-scroll-into-view-embed -- Settings layout isn't embedded
         tabMembers?.scrollIntoView({ behavior: "smooth" });
       }, 100);
     }
@@ -752,6 +749,13 @@ export default function SettingsLayoutAppDirClient({ children, ...rest }: Settin
       setSideContainerOpen(!sideContainerOpen);
     }
   }, [pathname]);
+
+  useEffect(() => {
+    // Settings layout isn't embedded
+    if (searchParams?.get("open") === "true") {
+      setSideContainerOpen(true);
+    }
+  }, [searchParams?.get("open")]);
 
   return (
     <Shell

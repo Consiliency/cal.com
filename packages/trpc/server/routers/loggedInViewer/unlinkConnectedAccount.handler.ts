@@ -18,7 +18,7 @@ const unlinkConnectedAccount = async ({ ctx }: UpdateProfileOptions) => {
   const calcomAdapter = CalComAdapter(prisma);
   // If it fails to delete, don't stop because the users login data might not be present
   try {
-    if (calcomAdapter) {
+    if (calcomAdapter && typeof calcomAdapter.unlinkAccount === "function") {
       await calcomAdapter.unlinkAccount({
         provider: user.identityProvider?.toLocaleLowerCase() || "",
         providerAccountId: user.identityProviderId || "",
