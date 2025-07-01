@@ -173,7 +173,7 @@ yarn dx
 ```
 
 #### Development tip
-1. Add `export NODE_OPTIONS=“--max-old-space-size=16384”` to your shell script to increase the memory limit for the node process. Alternatively, you can run this in your terminal before running the app. Replace 16384 with the amount of RAM you want to allocate to the node process.
+1. Add `export NODE_OPTIONS="--max-old-space-size=16384"` to your shell script to increase the memory limit for the node process. Alternatively, you can run this in your terminal before running the app. Replace 16384 with the amount of RAM you want to allocate to the node process.
 
 2. Add `NEXT_PUBLIC_LOGGER_LEVEL={level}` to your .env file to control the logging verbosity for all tRPC queries and mutations.\
    Where {level} can be one of the following:
@@ -630,7 +630,7 @@ following
 ### Setting up Twilio for SMS reminders
 
 1. Create a Twilio account (https://twilio.com/try-twilio)
-2. Click ‘Get a Twilio phone number’
+2. Click 'Get a Twilio phone number'
 3. Copy Account SID to your `.env` file into the `TWILIO_SID` field
 4. Copy Auth Token to your `.env` file into the `TWILIO_TOKEN` field
 5. Copy your Twilio phone number to your `.env` file into the `TWILIO_PHONE_NUMBER` field
@@ -641,7 +641,7 @@ following
 10. Choose phone number as sender type
 11. Add the listed phone number
 12. Leave all other fields as they are
-13. Complete setup and click ‘View my new Messaging Service’
+13. Complete setup and click 'View my new Messaging Service'
 14. Copy Messaging Service SID to your `.env` file into the `TWILIO_MESSAGING_SID` field
 15. Create a verify service
 16. Copy Verify Service SID to your `.env` file into the `TWILIO_VERIFY_SID` field
@@ -673,6 +673,4 @@ Special thanks to these amazing projects which help power Cal.com:
 - [Prisma](https://prisma.io/)
 
 Cal.com is an [open startup](https://cal.com/open) and [Jitsu](https://github.com/jitsucom/jitsu) (an open-source Segment alternative) helps us to track most of the usage metrics.
-# Trigger redeploy
-// Trigger deployment - Fri Jun 27 02:21:20 EDT 2025
-// Trigger deployment with both DATABASE_URL and DATABASE_DIRECT_URL set - Fri Jun 27 02:40:18 EDT 2025
+# Trigger redeploy - $(date)
