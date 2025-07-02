@@ -77,3 +77,71 @@ yarn build
 # CI build (ignores ESLint warnings, with increased memory)
 CI=true NODE_OPTIONS="--max-old-space-size=8192" yarn build
 ```
+
+---
+
+### 2025-07-01: Environment Variable Configuration for Vercel
+
+**Change Type**: Configuration
+
+**Description**: 
+Added critical environment variables to fix deployment issues.
+
+**Environment Variables Added**:
+- `SKIP_DB_MIGRATIONS=1` - Prevents database migrations during Vercel build
+- `ALLOWED_HOSTNAMES=cal-lj22mv86c-jenner-consiliencys-projects.vercel.app,bookings.frontierstrategies.ai` - Fixes hostname validation warning
+- `EMAIL_FROM="jenner@consiliency.io"` - Required for 2FA email notifications
+
+**Reason for Change**:
+- Build was failing due to attempted database migrations during deployment
+- Application logs showed hostname validation errors
+- 2FA setup was returning 500 error due to missing email configuration
+
+**Impact**:
+- Enables successful Vercel deployments
+- Fixes hostname validation warnings in logs
+- Should resolve 2FA setup issues
+
+**Note**: Database migrations confirmed to be already applied to Supabase database (447 migrations, no pending)
+
+---
+
+### 2025-07-02: Add Comprehensive Logging to 2FA Setup Endpoint
+
+**File Changed**: `apps/web/app/api/auth/two-factor/totp/setup/route.ts`
+
+**Change Type**: Debugging Enhancement
+
+**Description**: 
+Added detailed logging throughout the 2FA setup process to diagnose 500 errors occurring in production.
+
+**Specific Changes**:
+- **Lines 20-29**: Added try-catch around `parseRequestData` with error logging
+- **Lines 31-38**: Added try-catch around `getServerSession` with error logging
+- **Lines 50-59**: Added try-catch around database user lookup with error logging
+- **Lines 66-67**: Added logging for user identity provider and password hash status
+- **Lines 84-89**: Added logging for `CALENDSO_ENCRYPTION_KEY` environment variable check
+- **Lines 91-99**: Added try-catch around password verification with error logging
+- **Lines 108-144**: Added logging for secret generation, backup codes, database update, and QR code generation
+- **Line 147**: Added endpoint route parameter to `defaultResponderForAppDir` for better Sentry tracking
+
+**Key Logging Points**:
+- Request start and body parsing
+- Session retrieval and validation
+- User lookup and authentication checks
+- Password verification
+- Secret and backup code generation
+- Database update operations
+- QR code generation
+
+**Reason for Change**:
+- Production deployment was experiencing 500 errors on POST to `/api/auth/two-factor/totp/setup`
+- No clear error messages were available in logs
+- Added comprehensive logging to identify exact failure point
+
+**Impact**:
+- No functional changes - only adds logging
+- Will help diagnose production issues without affecting normal operation
+- Logs will appear in Vercel Function logs for debugging
+
+**Commit**: `6bfde97bf` - "Add detailed logging to 2FA setup endpoint for debugging"
