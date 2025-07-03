@@ -95,6 +95,7 @@
     "c8": "^7.13.0",
     "checkly": "latest",
     "dotenv-checker": "^1.1.5",
+    "dotenv-cli": "^8.0.0",
     "husky": "^8.0.0",
     "i18n-unused": "^0.13.0",
     "jest-diff": "^29.5.0",
@@ -105,6 +106,7 @@
     "node-gyp": "^10.2.0",
     "node-ical": "^0.16.1",
     "prettier": "^2.8.6",
+    "prisma": "latest",
     "prismock": "^1.33.4",
     "resize-observer-polyfill": "^1.5.1",
     "tsc-absolute": "^1.0.0",
@@ -116,6 +118,7 @@
   "dependencies": {
     "@daily-co/daily-js": "^0.76.0",
     "@next/third-parties": "^14.2.5",
+    "@prisma/client": "latest",
     "@vercel/functions": "^1.4.0",
     "city-timezones": "^1.2.1",
     "eslint": "^8.34.0",

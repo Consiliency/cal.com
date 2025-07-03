@@ -151,3 +151,17 @@ yarn app-store:watch      # Watch mode for app development
 3. Check tRPC errors in Network tab for API issues
 4. Run type checking to catch type errors early
 5. Use `yarn dev:api` to debug API-specific issues
+
+## Production Code Changes
+
+- **Critical Caution for Production Code**:
+  - Exercise extreme caution when modifying functional code as this is a well-vetted, widely-used production codebase.
+  - Document ALL production code changes immediately in PRODUCTION_CHANGES.md with:
+    * Date of change
+    * Files modified
+    * Specific changes made
+    * Before and after code snippets
+    * Reason for the change
+    * Impact assessment
+    * Commit hash
+  - Prefer minimal fixes over extensive refactoring
