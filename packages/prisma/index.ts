@@ -93,3 +93,6 @@ export type PrismaTransaction = OmitPrismaClient;
 export default prisma;
 
 export * from "./selects";
+
+// Re-export all Prisma types for convenience
+export * from "@prisma/client";
