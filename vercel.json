@@ -1,5 +1,5 @@
 {
-  "buildCommand": "cd packages/prisma && yarn prisma generate --schema=./schema.prisma && cd ../.. && turbo run build --filter=@calcom/web",
+  "buildCommand": "yarn workspace @calcom/prisma prisma generate && turbo run build --filter=@calcom/web",
   "installCommand": "yarn install",
   "outputDirectory": "apps/web/.next"
 }
