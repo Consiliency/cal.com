@@ -1,7 +1,7 @@
 {
-  "buildCommand": "cd ../.. && NODE_OPTIONS='--max-old-space-size=8192' yarn build",
+  "buildCommand": "bash deploy.sh",
   "outputDirectory": ".next",
-  "installCommand": "cd ../.. && corepack enable && corepack prepare yarn@3.8.7 --activate && yarn install",
+  "installCommand": "echo 'Install handled by deploy.sh'",
   "framework": "nextjs",
   "regions": ["iad1"],
   "functions": {
