@@ -6,8 +6,8 @@ export * from "@prisma/client";
 // Export the extended PrismaClient type
 export type PrismaClient = PrismaClientType;
 
-// Export prisma instance
-declare const prisma: PrismaClient;
+// Export prisma instance as both named and default export
+export declare const prisma: PrismaClient;
 export default prisma;
 
 // Export other instances
