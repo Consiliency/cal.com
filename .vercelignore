@@ -6,7 +6,7 @@ node_modules
 .yarn/cache
 .yarn/install-state.gz
 .yarn/unplugged
-!.yarn/releases
+# Keep .yarn/releases for Yarn binary
 
 # Build outputs
 .next
