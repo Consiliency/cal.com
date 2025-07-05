@@ -46,7 +46,6 @@ docs/images
 
 # Misc
 .yarn/versions
-.yarn/releases
 example-apps
 apps/ui-playground
 packages/platform/examples

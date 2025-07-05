@@ -162,7 +162,7 @@
     "schema": "packages/prisma/schema.prisma",
     "seed": "ts-node --transpile-only ./packages/prisma/seed.ts"
   },
-  "packageManager": "yarn@3.4.1",
+  "packageManager": "yarn@3.8.7",
   "syncpack": {
     "filter": "^(?!@calcom).*",
     "semverRange": ""
