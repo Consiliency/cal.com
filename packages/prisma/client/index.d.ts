@@ -1,1 +1,1 @@
-export * from "../../../node_modules/.prisma/client/index";
+export * from "../../../node_modules/@prisma/client";
