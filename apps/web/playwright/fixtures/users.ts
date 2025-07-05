@@ -1,8 +1,8 @@
 import type { Browser, Page, WorkerInfo } from "@playwright/test";
 import { expect } from "@playwright/test";
-import type Prisma from "@prisma/client";
-import type { Team } from "@prisma/client";
-import { Prisma as PrismaType } from "@prisma/client";
+import type Prisma from "@calcom/prisma/client";
+import type { Team } from "@calcom/prisma/client";
+import { Prisma as PrismaType } from "@calcom/prisma/client";
 import { hashSync as hash } from "bcryptjs";
 import { uuid } from "short-uuid";
 import { v4 } from "uuid";

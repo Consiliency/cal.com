@@ -4,7 +4,7 @@ import type {
   DestinationCalendar,
   Prisma,
   SelectedCalendar as _SelectedCalendar,
-} from "@prisma/client";
+} from "@calcom/prisma/client";
 import type { Dayjs } from "dayjs";
 import type { TFunction } from "i18next";
 import type { Time } from "ical.js";

@@ -1,4 +1,4 @@
-import type { Prisma } from "@prisma/client";
+import type { Prisma } from "@calcom/prisma/client";
 
 import { appDataSchemas } from "@calcom/app-store/apps.schemas.generated";
 import { RetryableError } from "@calcom/lib/crmManager/errors";

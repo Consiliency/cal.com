@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { WorkflowActions, WorkflowTemplates } from "@prisma/client";
+import { WorkflowActions, WorkflowTemplates } from "@calcom/prisma/client";
 import { Type } from "class-transformer";
 import { IsNumber, IsBoolean, IsString, ValidateNested, IsIn } from "class-validator";
 

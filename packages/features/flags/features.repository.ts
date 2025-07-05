@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { Prisma } from "@calcom/prisma/client";
 import { captureException } from "@sentry/nextjs";
 
 import db from "@calcom/prisma";

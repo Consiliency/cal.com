@@ -1,4 +1,4 @@
-import type { Availability } from "@prisma/client";
+import type { Availability } from "@calcom/prisma/client";
 
 import type { ConfigType } from "@calcom/dayjs";
 import dayjs from "@calcom/dayjs";

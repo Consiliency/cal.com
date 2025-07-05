@@ -6,7 +6,7 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 
 import { ORGANIZATION_SELF_SERVE_MIN_SEATS, ORGANIZATION_SELF_SERVE_PRICE } from "@calcom/lib/constants";
 import { MembershipRole } from "@calcom/prisma/enums";
-import { UserPermissionRole } from "@calcom/prisma/enums";
+import { UserPermissionRole, CreationSource } from "@calcom/prisma/enums";
 
 import { TRPCError } from "@trpc/server";
 
@@ -92,6 +92,7 @@ async function createTestUser(data: {
       name: data.name || "Test User",
       username: data.username || "testuser",
       role: data.role || UserPermissionRole.USER,
+      creationSource: CreationSource.WEBAPP,
     },
   });
 }

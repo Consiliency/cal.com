@@ -1,4 +1,4 @@
-import type { Prisma } from "@prisma/client";
+import type { Prisma } from "@calcom/prisma/client";
 import type { NextApiRequest } from "next";
 import { z } from "zod";
 

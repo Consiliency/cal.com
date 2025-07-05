@@ -3,7 +3,7 @@ import prismock from "../../../../../tests/libs/__mocks__/prisma";
 import { describe, expect, it, beforeEach } from "vitest";
 
 import type { AttributeOption } from "@calcom/prisma/client";
-import { AttributeType, MembershipRole } from "@calcom/prisma/enums";
+import { AttributeType, MembershipRole, CreationSource } from "@calcom/prisma/enums";
 
 import type { Attribute } from "./getAttributes";
 import { getAttributesForTeam, getAttributesAssignmentData, getUsersAttributes } from "./getAttributes";
@@ -62,6 +62,7 @@ async function createMockUserHavingMembershipWithBothTeamAndOrg({
     data: {
       name: "Test User",
       email: "test@test.com",
+      creationSource: CreationSource.WEBAPP,
     },
   });
 

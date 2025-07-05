@@ -1,4 +1,4 @@
-import type { Booking } from "@prisma/client";
+import type { Booking } from "@calcom/prisma/client";
 
 import logger from "@calcom/lib/logger";
 import { safeStringify } from "@calcom/lib/safeStringify";

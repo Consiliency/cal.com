@@ -1,4 +1,4 @@
-import type { Payment, Prisma } from "@prisma/client";
+import type { Payment, Prisma } from "@calcom/prisma/client";
 
 import dayjs from "@calcom/dayjs";
 import prisma from "@calcom/prisma";

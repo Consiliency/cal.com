@@ -1,5 +1,5 @@
 import type { Page, WorkerInfo } from "@playwright/test";
-import type { Booking, Prisma } from "@prisma/client";
+import type { Booking, Prisma } from "@calcom/prisma/client";
 import short from "short-uuid";
 import { v5 as uuidv5 } from "uuid";
 

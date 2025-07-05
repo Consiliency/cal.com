@@ -1,4 +1,4 @@
-import type { WorkflowTriggerEvents } from "@prisma/client";
+import type { WorkflowTriggerEvents } from "@calcom/prisma/client";
 import type { TFunction } from "i18next";
 
 import type { TimeFormat } from "@calcom/lib/timeFormat";

@@ -1,5 +1,5 @@
-import type { Webhook } from "@prisma/client";
-import type { Prisma } from "@prisma/client";
+import type { Webhook } from "@calcom/prisma/client";
+import type { Prisma } from "@calcom/prisma/client";
 import { v4 } from "uuid";
 
 import { updateTriggerForExistingBookings } from "@calcom/features/webhooks/lib/scheduleTrigger";

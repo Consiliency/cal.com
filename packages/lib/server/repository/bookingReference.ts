@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { Prisma } from "@calcom/prisma/client";
 
 import { prisma } from "@calcom/prisma";
 import type { PartialReference } from "@calcom/types/EventManager";

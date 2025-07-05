@@ -1,4 +1,4 @@
-import type { IdentityProvider, Prisma } from "@prisma/client";
+import type { IdentityProvider, Prisma } from "@calcom/prisma/client";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import type { Adapter } from "next-auth/adapters";
 

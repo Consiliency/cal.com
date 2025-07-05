@@ -6,7 +6,7 @@ import type {
   Credential,
   DestinationCalendar,
   User,
-} from "@prisma/client";
+} from "@calcom/prisma/client";
 
 import { prisma } from "@calcom/prisma";
 import { MembershipRole, SchedulingType } from "@calcom/prisma/enums";

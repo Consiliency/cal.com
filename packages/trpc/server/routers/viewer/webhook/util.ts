@@ -1,4 +1,4 @@
-import type { Membership } from "@prisma/client";
+import type { Membership } from "@calcom/prisma/client";
 
 import { checkAdminOrOwner } from "@calcom/features/auth/lib/checkAdminOrOwner";
 import { prisma } from "@calcom/prisma";

@@ -1,4 +1,4 @@
-import type { Webhook } from "@prisma/client";
+import type { Webhook } from "@calcom/prisma/client";
 import Link from "next/link";
 import { useState } from "react";
 import { useFormContext } from "react-hook-form";

@@ -1,5 +1,5 @@
 import { LightningAddress } from "@getalby/lightning-tools";
-import type { Booking, Payment, PaymentOption, Prisma } from "@prisma/client";
+import type { Booking, Payment, PaymentOption, Prisma } from "@calcom/prisma/client";
 import { v4 as uuidv4 } from "uuid";
 import type z from "zod";
 

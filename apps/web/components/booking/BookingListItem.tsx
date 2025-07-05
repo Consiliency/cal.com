@@ -1,4 +1,4 @@
-import type { AssignmentReason } from "@prisma/client";
+import type { AssignmentReason } from "@calcom/prisma/client";
 import Link from "next/link";
 import { useState } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";

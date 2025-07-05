@@ -1,4 +1,4 @@
-import type { Prisma, WorkflowReminder } from "@prisma/client";
+import type { Prisma, WorkflowReminder } from "@calcom/prisma/client";
 import type { z } from "zod";
 
 import { FAKE_DAILY_CREDENTIAL } from "@calcom/app-store/dailyvideo/lib/VideoApiAdapter";

@@ -1,6 +1,6 @@
 import { CreateOrganizationAttributeOptionInput } from "@/modules/organizations/attributes/options/inputs/create-organization-attribute-option.input";
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { AttributeType } from "@prisma/client";
+import { AttributeType } from "@calcom/prisma/client";
 import { Type } from "class-transformer";
 import {
   IsArray,

@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { Prisma } from "@calcom/prisma/client";
 import { describe, expect, beforeEach, afterEach, it } from "vitest";
 
 import prisma from "@calcom/prisma";

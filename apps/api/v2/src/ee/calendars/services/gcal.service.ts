@@ -10,7 +10,7 @@ import { Logger, NotFoundException } from "@nestjs/common";
 import { BadRequestException, UnauthorizedException } from "@nestjs/common";
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { Prisma } from "@prisma/client";
+import { Prisma } from "@calcom/prisma/client";
 import { Request } from "express";
 import { OAuth2Client } from "googleapis-common";
 import { z } from "zod";

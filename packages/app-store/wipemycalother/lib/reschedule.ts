@@ -1,4 +1,4 @@
-import type { Booking, BookingReference, User } from "@prisma/client";
+import type { Booking, BookingReference, User } from "@calcom/prisma/client";
 import type { TFunction } from "i18next";
 
 import dayjs from "@calcom/dayjs";

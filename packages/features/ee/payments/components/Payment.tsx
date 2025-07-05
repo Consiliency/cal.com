@@ -1,6 +1,6 @@
 "use client";
 
-import type { EventType, Payment } from "@prisma/client";
+import type { EventType, Payment } from "@calcom/prisma/client";
 import { Elements, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import type { StripeElementLocale, StripeElements, StripePaymentElementOptions } from "@stripe/stripe-js";
 import { useRouter } from "next/navigation";

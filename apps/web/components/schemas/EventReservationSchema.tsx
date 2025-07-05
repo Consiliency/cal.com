@@ -1,4 +1,4 @@
-import type { Attendee, Booking, User } from "@prisma/client";
+import type { Attendee, Booking, User } from "@calcom/prisma/client";
 import type { FC } from "react";
 import { useMemo } from "react";
 import { JsonLd } from "react-schemaorg";

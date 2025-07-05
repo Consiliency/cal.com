@@ -1,4 +1,4 @@
-import type { Prisma, Webhook, Booking } from "@prisma/client";
+import type { Prisma, Webhook, Booking } from "@calcom/prisma/client";
 import { v4 } from "uuid";
 
 import { selectOOOEntries } from "@calcom/app-store/zapier/api/subscriptions/listOOOEntries";

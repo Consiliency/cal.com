@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { MembershipRole } from "@prisma/client";
+import { MembershipRole } from "@calcom/prisma/client";
 import { Expose, Type } from "class-transformer";
 import { IsEnum, IsString, ValidateNested } from "class-validator";
 

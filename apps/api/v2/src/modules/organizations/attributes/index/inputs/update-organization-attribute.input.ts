@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from "@nestjs/swagger";
-import { AttributeType } from "@prisma/client";
+import { AttributeType } from "@calcom/prisma/client";
 import { IsBoolean, IsEnum, IsOptional, IsString } from "class-validator";
 
 export class UpdateOrganizationAttributeInput {

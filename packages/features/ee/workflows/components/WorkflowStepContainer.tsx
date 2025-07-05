@@ -1,4 +1,4 @@
-import type { WorkflowStep } from "@prisma/client";
+import type { WorkflowStep } from "@calcom/prisma/client";
 import { type TFunction } from "i18next";
 import type { Dispatch, SetStateAction } from "react";
 import { useEffect, useRef, useState } from "react";

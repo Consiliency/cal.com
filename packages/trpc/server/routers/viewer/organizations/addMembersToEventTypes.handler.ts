@@ -1,4 +1,4 @@
-import type { Prisma } from "@prisma/client";
+import type { Prisma } from "@calcom/prisma/client";
 
 import { isOrganisationAdmin } from "@calcom/lib/server/queries/organisations";
 import prisma from "@calcom/prisma";

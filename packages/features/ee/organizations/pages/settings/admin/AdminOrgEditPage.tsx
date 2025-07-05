@@ -1,6 +1,6 @@
 "use client";
 
-import type { Team } from "@prisma/client";
+import type { Team } from "@calcom/prisma/client";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import type { z } from "zod";

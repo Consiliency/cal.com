@@ -1,7 +1,7 @@
 import type { OnModuleDestroy, OnModuleInit } from "@nestjs/common";
 import { Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@calcom/prisma/client";
 
 @Injectable()
 export class PrismaReadService implements OnModuleInit, OnModuleDestroy {

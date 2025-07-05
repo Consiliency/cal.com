@@ -17,7 +17,7 @@ import { OAuthClientWebhooksService } from "@/modules/webhooks/services/oauth-cl
 import { WebhooksService } from "@/modules/webhooks/services/webhooks.service";
 import { Controller, Post, Body, UseGuards, Get, Param, Query, Delete, Patch } from "@nestjs/common";
 import { ApiHeader, ApiOperation, ApiTags as DocsTags } from "@nestjs/swagger";
-import { Webhook, MembershipRole } from "@prisma/client";
+import { Webhook, MembershipRole } from "@calcom/prisma/client";
 import { plainToClass } from "class-transformer";
 
 import { SUCCESS_STATUS, X_CAL_SECRET_KEY } from "@calcom/platform-constants";

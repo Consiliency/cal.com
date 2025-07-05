@@ -6,6 +6,7 @@ import { createMocks } from "node-mocks-http";
 import { describe, expect, test } from "vitest";
 
 import dayjs from "@calcom/dayjs";
+import { CreationSource } from "@calcom/prisma/enums";
 
 import handler from "./_get";
 
@@ -19,6 +20,7 @@ function buildMockData() {
       username: "test",
       name: "Test User",
       email: "test@example.com",
+      creationSource: CreationSource.WEBAPP,
     },
   });
   prismock.eventType.create({

@@ -2,7 +2,7 @@ import prismock from "../../../../../tests/libs/__mocks__/prisma";
 
 import { describe, expect, it } from "vitest";
 
-import { IdentityProvider } from "@calcom/prisma/enums";
+import { IdentityProvider, CreationSource } from "@calcom/prisma/enums";
 
 import unlinkConnectedAccountHandler from "./unlinkConnectedAccount.handler";
 
@@ -33,6 +33,7 @@ async function buildMockData(
       email: "test@example.com",
       identityProvider,
       identityProviderId,
+      creationSource: CreationSource.WEBAPP,
     },
   });
 

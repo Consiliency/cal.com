@@ -1,4 +1,4 @@
-import type { Availability } from "@prisma/client";
+import type { Availability } from "@calcom/prisma/client";
 
 import dayjs from "@calcom/dayjs";
 import { getWorkingHours } from "@calcom/lib/availability";

@@ -1,4 +1,4 @@
-import type { Prisma } from "@prisma/client";
+import type { Prisma } from "@calcom/prisma/client";
 import type { TFunction } from "i18next";
 
 import { defaultVideoAppCategories } from "@calcom/app-store/utils";

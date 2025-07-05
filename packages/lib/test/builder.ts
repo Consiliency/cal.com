@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker";
-import type { Booking, EventType, Prisma, Webhook, BookingReference } from "@prisma/client";
+import type { Booking, EventType, Prisma, Webhook, BookingReference } from "@calcom/prisma/client";
 import type { TFunction } from "i18next";
 
 import getICalUID from "@calcom/emails/lib/getICalUID";
@@ -281,6 +281,7 @@ type UserPayload = Prisma.UserGetPayload<{
     movedToProfileId: true;
     isPlatformManaged: true;
     smsLockState: true;
+    creationSource: true;
   };
 }>;
 export const buildUser = <T extends Partial<UserPayload>>(
@@ -335,6 +336,7 @@ export const buildUser = <T extends Partial<UserPayload>>(
     priority: user?.priority ?? 2,
     weight: user?.weight ?? 100,
     isPlatformManaged: false,
+    creationSource: CreationSource.WEBAPP,
     ...user,
   };
 };

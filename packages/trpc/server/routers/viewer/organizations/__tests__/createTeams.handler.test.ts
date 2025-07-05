@@ -22,6 +22,7 @@ async function createTestUser(data: {
       username: data.username || "testuser",
       role: data.role || UserPermissionRole.USER,
       organizationId: data.organizationId,
+      creationSource: CreationSource.WEBAPP,
     },
   });
 }

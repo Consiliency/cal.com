@@ -8,7 +8,7 @@ import bookingFormHandlers from "@calcom/app-store/routing-forms/appBookingFormH
 import { ROUTING_FORM_RESPONSE_ID_QUERY_STRING } from "@calcom/app-store/routing-forms/lib/constants";
 import { RouteActionType } from "@calcom/app-store/routing-forms/zod";
 import { getTeamMemberEmailForResponseOrContactUsingUrlQuery } from "@calcom/lib/server/getTeamMemberEmailFromCrm";
-import { SchedulingType } from "@calcom/prisma/enums";
+import { SchedulingType, CreationSource } from "@calcom/prisma/enums";
 
 vi.mock("@calcom/app-store/routing-forms/appBookingFormHandler", () => ({
   default: {
@@ -75,6 +75,7 @@ async function createRoutingFormWithResponse({
       name: "Routing Form User",
       username: "routing-form-user",
       email: "routing-form-user@example.com",
+      creationSource: CreationSource.WEBAPP,
     },
   });
 
@@ -135,6 +136,7 @@ async function createHostForEvent({
     data: {
       name: "Test User",
       username: "testuser",
+      creationSource: CreationSource.WEBAPP,
       ...userData,
     },
   });

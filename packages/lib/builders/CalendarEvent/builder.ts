@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { Prisma } from "@calcom/prisma/client";
 import short from "short-uuid";
 import { v5 as uuidv5 } from "uuid";
 

@@ -4,7 +4,7 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 
 import prisma from "@calcom/prisma";
 import type { AttributeOption } from "@calcom/prisma/client";
-import { AttributeType, MembershipRole } from "@calcom/prisma/enums";
+import { AttributeType, MembershipRole, CreationSource } from "@calcom/prisma/enums";
 
 import { assignValueToUserInOrgBulk, buildPrismaQueriesForAttributeOptionToUser } from "./assignValueToUser";
 
@@ -50,6 +50,7 @@ async function createMockUserWithMembership({ orgId }: { orgId: number }) {
     data: {
       name: "Test User",
       email: "test@test.com",
+      creationSource: CreationSource.WEBAPP,
     },
   });
   const membership = await prismock.membership.create({

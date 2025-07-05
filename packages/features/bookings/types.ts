@@ -1,4 +1,4 @@
-import type { SchedulingType } from "@prisma/client";
+import type { SchedulingType } from "@calcom/prisma/client";
 import type { ErrorOption, FieldPath } from "react-hook-form";
 
 import type { BookingCreateBody } from "@calcom/prisma/zod/custom/booking";

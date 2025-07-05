@@ -1,4 +1,4 @@
-import type { Prisma, Booking } from "@prisma/client";
+import type { Prisma, Booking } from "@calcom/prisma/client";
 import type { NextApiRequest } from "next";
 
 import { HttpError } from "@calcom/lib/http-error";

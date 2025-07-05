@@ -3,7 +3,7 @@ import prismock from "../../../../../../tests/libs/__mocks__/prisma";
 import { describe, expect, it, vi, beforeEach } from "vitest";
 
 import { LicenseKeySingleton } from "@calcom/ee/common/server/LicenseKeyService";
-import { UserPermissionRole } from "@calcom/prisma/enums";
+import { UserPermissionRole, CreationSource } from "@calcom/prisma/enums";
 
 import { TRPCError } from "@trpc/server";
 
@@ -42,6 +42,7 @@ async function createTestUser(data: {
       role: data.role || UserPermissionRole.USER,
       completedOnboarding: data.completedOnboarding ?? false,
       emailVerified: data.emailVerified ?? null,
+      creationSource: CreationSource.WEBAPP,
     },
   });
 }

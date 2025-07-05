@@ -1,7 +1,7 @@
 "use client";
 
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-import type { AppCategories } from "@prisma/client";
+import type { AppCategories } from "@calcom/prisma/client";
 import type { UIEvent } from "react";
 import { useEffect, useRef, useState } from "react";
 

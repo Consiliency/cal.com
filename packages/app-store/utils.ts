@@ -1,4 +1,4 @@
-import type { AppCategories } from "@prisma/client";
+import type { AppCategories } from "@calcom/prisma/client";
 
 // If you import this file on any app it should produce circular dependency
 // import appStore from "./index";

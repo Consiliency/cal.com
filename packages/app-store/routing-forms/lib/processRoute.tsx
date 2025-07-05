@@ -1,6 +1,6 @@
 "use client";
 
-import type { App_RoutingForms_Form } from "@prisma/client";
+import type { App_RoutingForms_Form } from "@calcom/prisma/client";
 import type { JsonTree } from "react-awesome-query-builder";
 import type { z } from "zod";
 

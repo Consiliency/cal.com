@@ -1,5 +1,5 @@
-import type { EventType as PrismaEventType } from "@prisma/client";
-import { Prisma } from "@prisma/client";
+import type { EventType as PrismaEventType } from "@calcom/prisma/client";
+import { Prisma } from "@calcom/prisma/client";
 
 import logger from "@calcom/lib/logger";
 import { prisma, availabilityUserSelect } from "@calcom/prisma";

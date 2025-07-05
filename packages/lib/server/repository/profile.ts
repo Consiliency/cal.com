@@ -1,4 +1,4 @@
-import type { User as PrismaUser } from "@prisma/client";
+import type { User as PrismaUser } from "@calcom/prisma/client";
 import { v4 as uuidv4 } from "uuid";
 
 import { whereClauseForOrgWithSlugOrRequestedSlug } from "@calcom/ee/organizations/lib/orgDomains";

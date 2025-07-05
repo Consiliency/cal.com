@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { Prisma } from "@calcom/prisma/client";
 import { z } from "zod";
 
 import { emailSchema } from "@calcom/lib/emailSchema";

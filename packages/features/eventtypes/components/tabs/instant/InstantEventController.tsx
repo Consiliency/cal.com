@@ -1,4 +1,4 @@
-import type { Webhook } from "@prisma/client";
+import type { Webhook } from "@calcom/prisma/client";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
 import { useFormContext, Controller } from "react-hook-form";
