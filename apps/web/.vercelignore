@@ -2,10 +2,11 @@
 node_modules
 **/node_modules
 
-# Yarn 3 cache
-.yarn/cache
-.yarn/install-state.gz
-.yarn/unplugged
+# Yarn 3 cache (but keep releases)
+../../.yarn/cache
+../../.yarn/install-state.gz
+../../.yarn/unplugged
+!../../.yarn/releases
 
 # Build outputs
 .next
