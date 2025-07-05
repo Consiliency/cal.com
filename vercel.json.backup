@@ -1,7 +1,0 @@
-{
-  "buildCommand": "yarn turbo run post-install && NODE_OPTIONS='--max-old-space-size=8192' yarn build",
-  "outputDirectory": "apps/web/.next",
-  "installCommand": "yarn install --mode=update-lockfile",
-  "framework": "nextjs",
-  "regions": ["iad1"]
-}
