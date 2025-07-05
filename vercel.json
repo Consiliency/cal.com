@@ -1,7 +1,7 @@
 {
-  "buildCommand": "NODE_OPTIONS='--max-old-space-size=8192' yarn build",
+  "buildCommand": "yarn workspace @calcom/prisma generate-schemas && NODE_OPTIONS='--max-old-space-size=8192' yarn build",
   "outputDirectory": "apps/web/.next",
-  "installCommand": "yarn install --immutable",
+  "installCommand": "yarn install",
   "framework": "nextjs",
   "regions": ["iad1"]
 }
