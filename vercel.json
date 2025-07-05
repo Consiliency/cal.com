@@ -3,10 +3,5 @@
   "outputDirectory": "apps/web/.next",
   "installCommand": "yarn install",
   "framework": "nextjs",
-  "regions": ["iad1"],
-  "functions": {
-    "apps/web/pages/api/**/*": {
-      "maxDuration": 60
-    }
-  }
+  "regions": ["iad1"]
 }
