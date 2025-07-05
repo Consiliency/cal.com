@@ -1,7 +1,7 @@
 {
   "buildCommand": "yarn workspace @calcom/prisma generate-schemas && NODE_OPTIONS='--max-old-space-size=8192' yarn build",
   "outputDirectory": "apps/web/.next",
-  "installCommand": "yarn install",
+  "installCommand": "yarn install --mode=update-lockfile",
   "framework": "nextjs",
   "regions": ["iad1"]
 }
