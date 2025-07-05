@@ -1,7 +1,7 @@
 {
-  "buildCommand": "cd packages/prisma && yarn generate-schemas && cd ../.. && NODE_OPTIONS='--max-old-space-size=8192' yarn build",
+  "buildCommand": "NODE_OPTIONS='--max-old-space-size=8192' yarn build",
   "outputDirectory": "apps/web/.next",
-  "installCommand": "yarn install --mode=update-lockfile",
+  "installCommand": "yarn install --mode=update-lockfile && yarn postinstall",
   "framework": "nextjs",
   "regions": ["iad1"]
 }
