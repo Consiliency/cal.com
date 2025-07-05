@@ -1,7 +1,7 @@
 {
   "buildCommand": "NODE_OPTIONS='--max-old-space-size=8192' yarn build",
   "outputDirectory": "apps/web/.next",
-  "installCommand": "yarn install",
+  "installCommand": "yarn install --immutable",
   "framework": "nextjs",
   "regions": ["iad1"]
 }
