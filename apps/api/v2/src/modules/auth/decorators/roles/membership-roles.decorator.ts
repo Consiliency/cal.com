@@ -1,4 +1,4 @@
 import { Reflector } from "@nestjs/core";
-import { MembershipRole } from "@calcom/prisma/client";
+import { MembershipRole } from "@prisma/client";
 
 export const MembershipRoles = Reflector.createDecorator<MembershipRole[]>();

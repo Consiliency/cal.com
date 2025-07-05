@@ -1,4 +1,4 @@
-import type { Prisma } from "@calcom/prisma/client";
+import type { Prisma } from "@prisma/client";
 
 import { uniqueBy } from "@calcom/lib/array";
 import { isInMemoryDelegationCredential } from "@calcom/lib/delegationCredential/clientAndServer";

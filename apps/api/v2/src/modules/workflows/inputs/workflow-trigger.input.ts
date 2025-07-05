@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { TimeUnit, WorkflowTriggerEvents } from "@calcom/prisma/client";
+import { TimeUnit, WorkflowTriggerEvents } from "@prisma/client";
 import { Type } from "class-transformer";
 import { IsNumber, ValidateNested } from "class-validator";
 

@@ -1,4 +1,4 @@
-import type { Prisma } from "@calcom/prisma/client";
+import type { Prisma } from "@prisma/client";
 import type { TFunction } from "next-i18next";
 
 import type { TimeFormat } from "@calcom/lib/timeFormat";

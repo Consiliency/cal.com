@@ -3,7 +3,7 @@
  * Also, it is applicable only for sub-teams. Regular teams and user Routing Forms don't hit this endpoint.
  * Live mode uses findTeamMembersMatchingAttributeLogicOfRoute fn directly
  */
-import type { App_RoutingForms_Form } from "@calcom/prisma/client";
+import type { App_RoutingForms_Form } from "@prisma/client";
 import type { ServerResponse } from "http";
 import type { NextApiResponse } from "next";
 

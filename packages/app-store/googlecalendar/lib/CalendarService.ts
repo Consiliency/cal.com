@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { calendar_v3 } from "@googleapis/calendar";
-import type { Prisma } from "@calcom/prisma/client";
+import type { Prisma } from "@prisma/client";
 import type { GaxiosResponse } from "googleapis-common";
 import { RRule } from "rrule";
 import { v4 as uuid } from "uuid";

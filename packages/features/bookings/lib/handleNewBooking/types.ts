@@ -1,5 +1,5 @@
-import type { App } from "@calcom/prisma/client";
-import type { Prisma } from "@calcom/prisma/client";
+import type { App } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 import type { TFunction } from "i18next";
 
 import type { EventTypeAppsList } from "@calcom/app-store/utils";

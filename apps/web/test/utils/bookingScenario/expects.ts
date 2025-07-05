@@ -2,7 +2,7 @@ import prismaMock from "../../../../../tests/libs/__mocks__/prisma";
 
 import type { InputEventType, getOrganizer, CalendarServiceMethodMock } from "./bookingScenario";
 
-import type { WebhookTriggerEvents, Booking, BookingReference, DestinationCalendar } from "@calcom/prisma/client";
+import type { WebhookTriggerEvents, Booking, BookingReference, DestinationCalendar } from "@prisma/client";
 import { parse } from "node-html-parser";
 import type { VEvent } from "node-ical";
 import ical from "node-ical";

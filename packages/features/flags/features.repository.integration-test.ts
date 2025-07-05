@@ -1,4 +1,4 @@
-import { PrismaClient } from "@calcom/prisma/client";
+import { PrismaClient } from "@prisma/client";
 import { describe, expect, beforeAll, afterAll, beforeEach, it } from "vitest";
 
 import type { AppFlags } from "./config";

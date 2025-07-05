@@ -18,7 +18,7 @@ import { GetWorkflowOutput, GetWorkflowsOutput } from "@/modules/workflows/outpu
 import { INestApplication } from "@nestjs/common";
 import { NestExpressApplication } from "@nestjs/platform-express";
 import { Test } from "@nestjs/testing";
-import { User, Team } from "@calcom/prisma/client";
+import { User, Team } from "@prisma/client";
 import * as request from "supertest";
 import { ApiKeysRepositoryFixture } from "test/fixtures/repository/api-keys.repository.fixture";
 import { MembershipRepositoryFixture } from "test/fixtures/repository/membership.repository.fixture";

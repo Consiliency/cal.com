@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/triple-slash-reference */
 /// <reference path="../types/ical.d.ts"/>
-import type { Prisma } from "@calcom/prisma/client";
+import type { Prisma } from "@prisma/client";
 import ICAL from "ical.js";
 import type { Attendee, DateArray, DurationObject } from "ics";
 import { createEvent } from "ics";

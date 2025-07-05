@@ -1,4 +1,4 @@
-import type { Prisma } from "@calcom/prisma/client";
+import type { Prisma } from "@prisma/client";
 import type z from "zod";
 
 import type { Workflow } from "@calcom/features/ee/workflows/lib/types";

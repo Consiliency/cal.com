@@ -1,5 +1,5 @@
 import type { Page } from "@playwright/test";
-import type { Team } from "@calcom/prisma/client";
+import type { Team } from "@prisma/client";
 
 import { prisma } from "@calcom/prisma";
 import { teamMetadataSchema } from "@calcom/prisma/zod-utils";

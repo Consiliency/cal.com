@@ -5,7 +5,7 @@ import type {
   OutOfOfficeReason,
   User,
   EventType as PrismaEventType,
-} from "@calcom/prisma/client";
+} from "@prisma/client";
 import * as Sentry from "@sentry/nextjs";
 import { z } from "zod";
 

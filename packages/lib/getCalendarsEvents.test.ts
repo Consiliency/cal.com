@@ -1,4 +1,4 @@
-import type { SelectedCalendar } from "@calcom/prisma/client";
+import type { SelectedCalendar } from "@prisma/client";
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 
 import GoogleCalendarService from "@calcom/app-store/googlecalendar/lib/CalendarService";

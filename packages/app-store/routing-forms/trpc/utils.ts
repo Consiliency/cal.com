@@ -1,4 +1,4 @@
-import type { App_RoutingForms_Form, User } from "@calcom/prisma/client";
+import type { App_RoutingForms_Form, User } from "@prisma/client";
 
 import dayjs from "@calcom/dayjs";
 import type { Tasker } from "@calcom/features/tasker/tasker";

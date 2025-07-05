@@ -1,4 +1,4 @@
-import type { Booking, Prisma, Prisma as PrismaClientType } from "@calcom/prisma/client";
+import type { Booking, Prisma, Prisma as PrismaClientType } from "@prisma/client";
 import type { Kysely } from "kysely";
 import { type SelectQueryBuilder } from "kysely";
 import { jsonObjectFrom, jsonArrayFrom } from "kysely/helpers/postgres";

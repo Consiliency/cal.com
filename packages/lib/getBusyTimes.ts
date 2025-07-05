@@ -1,5 +1,5 @@
-import type { Booking, EventType } from "@calcom/prisma/client";
-import type { Prisma } from "@calcom/prisma/client";
+import type { Booking, EventType } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 
 import dayjs from "@calcom/dayjs";
 import { getBusyCalendarTimes } from "@calcom/lib/CalendarManager";

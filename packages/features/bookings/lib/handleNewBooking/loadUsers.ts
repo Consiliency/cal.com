@@ -1,4 +1,4 @@
-import { Prisma } from "@calcom/prisma/client";
+import { Prisma } from "@prisma/client";
 
 import { getOrgDomainConfig } from "@calcom/features/ee/organizations/lib/orgDomains";
 import {

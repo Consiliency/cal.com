@@ -10,7 +10,7 @@ import { LicenseKeySingleton } from "@calcom/ee/common/server/LicenseKeyService"
 import * as constants from "@calcom/lib/constants";
 import { createDomain } from "@calcom/lib/domainManager/organization";
 import type { OrganizationOnboarding } from "@calcom/prisma/client";
-import { MembershipRole, CreationSource } from "@calcom/prisma/enums";
+import { MembershipRole } from "@calcom/prisma/enums";
 import { createTeamsHandler } from "@calcom/trpc/server/routers/viewer/organizations/createTeams.handler";
 import { inviteMembersWithNoInviterPermissionCheck } from "@calcom/trpc/server/routers/viewer/teams/inviteMember/inviteMember.handler";
 
@@ -82,7 +82,6 @@ async function createTestUser(data: {
       metadata: data.metadata || {},
       completedOnboarding: data.onboardingCompleted,
       emailVerified: data.emailVerified,
-      creationSource: CreationSource.WEBAPP,
     },
   });
 }

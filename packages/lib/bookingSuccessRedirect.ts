@@ -1,4 +1,4 @@
-import type { EventType } from "@calcom/prisma/client";
+import type { EventType } from "@prisma/client";
 import { useRouter } from "next/navigation";
 
 import dayjs from "@calcom/dayjs";

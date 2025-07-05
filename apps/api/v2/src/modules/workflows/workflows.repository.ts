@@ -2,7 +2,7 @@ import { PrismaReadService } from "@/modules/prisma/prisma-read.service";
 import { PrismaWriteService } from "@/modules/prisma/prisma-write.service";
 import { UserWithProfile } from "@/modules/users/users.repository";
 import { Injectable } from "@nestjs/common";
-import { TimeUnit, Workflow, WorkflowStep, WorkflowTriggerEvents } from "@calcom/prisma/client";
+import { TimeUnit, Workflow, WorkflowStep, WorkflowTriggerEvents } from "@prisma/client";
 
 import { TUpdateInputSchema } from "@calcom/platform-libraries/workflows";
 import { updateWorkflow } from "@calcom/platform-libraries/workflows";

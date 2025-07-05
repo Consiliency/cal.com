@@ -1,5 +1,5 @@
-import type { DestinationCalendar } from "@calcom/prisma/client";
-import type { Prisma } from "@calcom/prisma/client";
+import type { DestinationCalendar } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 
 import { metadata as GoogleMeetMetadata } from "@calcom/app-store/googlevideo/_metadata";
 import { MeetLocationType } from "@calcom/app-store/locations";

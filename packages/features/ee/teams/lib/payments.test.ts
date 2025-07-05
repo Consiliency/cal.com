@@ -3,7 +3,6 @@ import prismock from "../../../../../tests/libs/__mocks__/prisma";
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 
 import stripe from "@calcom/features/ee/payments/server/stripe";
-import { CreationSource } from "@calcom/prisma/enums";
 import { BillingPeriod } from "@calcom/prisma/zod-utils";
 
 import {
@@ -72,7 +71,6 @@ describe("purchaseTeamOrOrgSubscription", () => {
       data: {
         name: "test",
         email: "test@email.com",
-        creationSource: CreationSource.WEBAPP,
       },
     });
 
@@ -139,7 +137,6 @@ describe("purchaseTeamOrOrgSubscription", () => {
       data: {
         name: "test",
         email: "test@email.com",
-        creationSource: CreationSource.WEBAPP,
       },
     });
 
@@ -211,7 +208,6 @@ describe("purchaseTeamOrOrgSubscription", () => {
       data: {
         name: "test",
         email: "test@email.com",
-        creationSource: CreationSource.WEBAPP,
       },
     });
 
@@ -284,7 +280,6 @@ describe("purchaseTeamOrOrgSubscription", () => {
       data: {
         name: "test",
         email: "test@email.com",
-        creationSource: CreationSource.WEBAPP,
       },
     });
 

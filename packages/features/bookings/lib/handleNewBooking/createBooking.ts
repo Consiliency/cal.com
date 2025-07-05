@@ -1,4 +1,4 @@
-import { Prisma } from "@calcom/prisma/client";
+import { Prisma } from "@prisma/client";
 import type short from "short-uuid";
 import type { z } from "zod";
 

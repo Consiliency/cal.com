@@ -1,5 +1,5 @@
-import type { App_RoutingForms_Form } from "@calcom/prisma/client";
-import { Prisma } from "@calcom/prisma/client";
+import type { App_RoutingForms_Form } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 
 import { entityPrismaWhereClause, canEditEntity } from "@calcom/lib/entityPermissionUtils.server";
 import type { PrismaClient } from "@calcom/prisma";

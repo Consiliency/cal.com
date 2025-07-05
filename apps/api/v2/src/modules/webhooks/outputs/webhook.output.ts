@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { WebhookTriggerEvents } from "@calcom/prisma/client";
+import { WebhookTriggerEvents } from "@prisma/client";
 import { Expose, Type } from "class-transformer";
 import { IsBoolean, IsEnum, IsInt, IsString, ValidateNested, IsArray } from "class-validator";
 

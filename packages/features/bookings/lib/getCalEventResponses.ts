@@ -1,4 +1,4 @@
-import type { EventType, Prisma } from "@calcom/prisma/client";
+import type { EventType, Prisma } from "@prisma/client";
 import type z from "zod";
 
 import { SystemField } from "@calcom/features/bookings/lib/SystemField";

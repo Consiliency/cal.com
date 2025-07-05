@@ -1,4 +1,4 @@
-import { Prisma } from "@calcom/prisma/client";
+import { Prisma } from "@prisma/client";
 // eslint-disable-next-line no-restricted-imports
 import mapKeys from "lodash/mapKeys";
 // eslint-disable-next-line no-restricted-imports

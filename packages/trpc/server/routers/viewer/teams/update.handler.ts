@@ -1,4 +1,4 @@
-import type { Prisma } from "@calcom/prisma/client";
+import type { Prisma } from "@prisma/client";
 
 import { getOrgFullOrigin } from "@calcom/ee/organizations/lib/orgDomains";
 import { IS_TEAM_BILLING_ENABLED } from "@calcom/lib/constants";

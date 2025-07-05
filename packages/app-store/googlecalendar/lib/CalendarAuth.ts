@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { calendar_v3 } from "@googleapis/calendar";
-import type { Prisma } from "@calcom/prisma/client";
+import type { Prisma } from "@prisma/client";
 import { OAuth2Client, JWT } from "googleapis-common";
 
 import {

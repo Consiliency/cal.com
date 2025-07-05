@@ -27,7 +27,7 @@ import {
   ParseIntPipe,
 } from "@nestjs/common";
 import { ApiHeader, ApiOperation, ApiTags as DocsTags } from "@nestjs/swagger";
-import { Webhook } from "@calcom/prisma/client";
+import { Webhook } from "@prisma/client";
 import { plainToClass } from "class-transformer";
 
 import { SUCCESS_STATUS } from "@calcom/platform-constants";

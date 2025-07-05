@@ -1,4 +1,4 @@
-import { Prisma } from "@calcom/prisma/client";
+import { Prisma } from "@prisma/client";
 
 export const teamBillingSelect = Prisma.validator<Prisma.TeamSelect>()({
   id: true,

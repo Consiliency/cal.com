@@ -1,4 +1,4 @@
-import type { EventTypeCustomInput, EventType } from "@calcom/prisma/client";
+import type { EventTypeCustomInput, EventType } from "@prisma/client";
 import type { z } from "zod";
 
 import { SMS_REMINDER_NUMBER_FIELD } from "@calcom/features/bookings/lib/SystemField";

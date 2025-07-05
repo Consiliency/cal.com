@@ -1,4 +1,4 @@
-import type { Attendee } from "@calcom/prisma/client";
+import type { Attendee } from "@prisma/client";
 
 // eslint-disable-next-line no-restricted-imports
 import { getCalendar } from "@calcom/app-store/_utils/getCalendar";

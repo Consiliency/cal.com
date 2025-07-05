@@ -1,4 +1,4 @@
-import type { User } from "@calcom/prisma/client";
+import type { User } from "@prisma/client";
 
 import dayjs from "@calcom/dayjs";
 import { getTranslation } from "@calcom/lib/server/i18n";

@@ -15,7 +15,7 @@ import { UsersModule } from "@/modules/users/users.module";
 import { INestApplication } from "@nestjs/common";
 import { NestExpressApplication } from "@nestjs/platform-express";
 import { Test } from "@nestjs/testing";
-import { Attribute, AttributeOption, User } from "@calcom/prisma/client";
+import { Attribute, AttributeOption, User } from "@prisma/client";
 import * as request from "supertest";
 import { AttributeRepositoryFixture } from "test/fixtures/repository/attributes.repository.fixture";
 import { MembershipRepositoryFixture } from "test/fixtures/repository/membership.repository.fixture";

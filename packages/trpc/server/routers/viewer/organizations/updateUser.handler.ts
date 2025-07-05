@@ -1,4 +1,4 @@
-import type { Prisma, PrismaPromise, User, Membership, Profile } from "@calcom/prisma/client";
+import type { Prisma, PrismaPromise, User, Membership, Profile } from "@prisma/client";
 
 import { ensureOrganizationIsReviewed } from "@calcom/ee/organizations/lib/ensureOrganizationIsReviewed";
 import { checkAdminOrOwner } from "@calcom/features/auth/lib/checkAdminOrOwner";

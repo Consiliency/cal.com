@@ -1,4 +1,4 @@
-import type { App_RoutingForms_IncompleteBookingActions } from "@calcom/prisma/client";
+import type { App_RoutingForms_IncompleteBookingActions } from "@prisma/client";
 
 import { incompleteBookingAction as salesforceIncompleteBookingAction } from "@calcom/app-store/salesforce/lib/routingForm/incompleteBookingAction";
 import { IncompleteBookingActionType } from "@calcom/prisma/enums";

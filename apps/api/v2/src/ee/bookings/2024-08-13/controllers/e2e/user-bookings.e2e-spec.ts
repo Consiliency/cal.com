@@ -14,7 +14,7 @@ import { UsersModule } from "@/modules/users/users.module";
 import { INestApplication } from "@nestjs/common";
 import { NestExpressApplication } from "@nestjs/platform-express";
 import { Test } from "@nestjs/testing";
-import { EventType, User, Workflow } from "@calcom/prisma/client";
+import { EventType, User, Workflow } from "@prisma/client";
 import { advanceTo, clear } from "jest-date-mock";
 import * as request from "supertest";
 import { BookingsRepositoryFixture } from "test/fixtures/repository/bookings.repository.fixture";

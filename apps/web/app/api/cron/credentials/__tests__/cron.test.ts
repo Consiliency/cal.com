@@ -3,7 +3,6 @@ import prismock from "../../../../../../../tests/libs/__mocks__/prisma";
 import { describe, it, expect, beforeEach } from "vitest";
 
 import type { MembershipRole } from "@calcom/prisma/enums";
-import { CreationSource } from "@calcom/prisma/enums";
 
 import { handleCreateCredentials } from "../route";
 
@@ -12,7 +11,7 @@ const createOrg = async ({ id }: OrgParams) =>
   await prismock.team.create({ data: { id, name: `Org${id}`, isOrganization: true } });
 
 type UserParams = { id: number; email: string };
-const createUser = async ({ id, email }: UserParams) => await prismock.user.create({ data: { id, email, creationSource: CreationSource.WEBAPP } });
+const createUser = async ({ id, email }: UserParams) => await prismock.user.create({ data: { id, email } });
 
 type WorkspacePlatformParams = { id: number; name?: string; slug?: string; description?: string };
 const createWorkspacePlatform = async ({ id, name, slug, description }: WorkspacePlatformParams) =>

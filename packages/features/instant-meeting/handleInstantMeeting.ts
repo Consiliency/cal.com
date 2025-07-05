@@ -1,4 +1,4 @@
-import { Prisma } from "@calcom/prisma/client";
+import { Prisma } from "@prisma/client";
 import { randomBytes } from "crypto";
 import type { NextApiRequest } from "next";
 import short from "short-uuid";

@@ -1,4 +1,4 @@
-import type { EventTypeCustomInput } from "@calcom/prisma/client";
+import type { EventTypeCustomInput } from "@prisma/client";
 import type z from "zod";
 
 import dayjs from "@calcom/dayjs";

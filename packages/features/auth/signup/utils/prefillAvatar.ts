@@ -1,4 +1,4 @@
-import type { Prisma } from "@calcom/prisma/client";
+import type { Prisma } from "@prisma/client";
 import fetch from "node-fetch";
 
 import { uploadAvatar } from "@calcom/lib/server/avatar";

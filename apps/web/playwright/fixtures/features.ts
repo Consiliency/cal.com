@@ -1,5 +1,5 @@
 import type { Page } from "@playwright/test";
-import type { Feature } from "@calcom/prisma/client";
+import type { Feature } from "@prisma/client";
 
 import type { AppFlags } from "@calcom/features/flags/config";
 import { prisma } from "@calcom/prisma";

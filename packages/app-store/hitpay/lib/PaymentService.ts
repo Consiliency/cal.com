@@ -1,4 +1,4 @@
-import type { Booking, Payment, PaymentOption, Prisma } from "@calcom/prisma/client";
+import type { Booking, Payment, PaymentOption, Prisma } from "@prisma/client";
 import axios from "axios";
 import qs from "qs";
 import { v4 as uuidv4 } from "uuid";

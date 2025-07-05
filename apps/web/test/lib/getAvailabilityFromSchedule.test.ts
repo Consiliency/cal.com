@@ -1,4 +1,4 @@
-import type { Availability } from "@calcom/prisma/client";
+import type { Availability } from "@prisma/client";
 import { expect, it, beforeAll, vi } from "vitest";
 
 import dayjs from "@calcom/dayjs";

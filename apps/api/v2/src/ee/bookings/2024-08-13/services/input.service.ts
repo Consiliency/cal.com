@@ -22,7 +22,7 @@ import { UsersRepository } from "@/modules/users/users.repository";
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { CreationSource } from "@calcom/prisma/client";
+import { CreationSource } from "@prisma/client";
 import { isURL, isPhoneNumber } from "class-validator";
 import { Request } from "express";
 import { DateTime } from "luxon";

@@ -1,4 +1,4 @@
-import { Prisma } from "@calcom/prisma/client";
+import { Prisma } from "@prisma/client";
 
 import { HttpError as HttpCode } from "@calcom/lib/http-error";
 import prisma from "@calcom/prisma";

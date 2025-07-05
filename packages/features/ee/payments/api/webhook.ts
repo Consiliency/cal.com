@@ -1,4 +1,4 @@
-import type { Prisma } from "@calcom/prisma/client";
+import type { Prisma } from "@prisma/client";
 import { buffer } from "micro";
 import type { NextApiRequest, NextApiResponse } from "next";
 import type Stripe from "stripe";

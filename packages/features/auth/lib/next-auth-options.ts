@@ -1,5 +1,5 @@
 import { calendar_v3 } from "@googleapis/calendar";
-import type { Membership, Team, UserPermissionRole } from "@calcom/prisma/client";
+import type { Membership, Team, UserPermissionRole } from "@prisma/client";
 import { waitUntil } from "@vercel/functions";
 import { OAuth2Client } from "googleapis-common";
 import type { AuthOptions, Session, User } from "next-auth";

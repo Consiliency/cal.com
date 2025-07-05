@@ -1,5 +1,5 @@
-import type { User as UserType } from "@calcom/prisma/client";
-import { Prisma } from "@calcom/prisma/client";
+import type { User as UserType } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 
 import type { LocationObject } from "@calcom/app-store/locations";
 import { privacyFilteredLocations } from "@calcom/app-store/locations";

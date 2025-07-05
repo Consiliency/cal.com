@@ -1,4 +1,4 @@
-import { Prisma } from "@calcom/prisma/client";
+import { Prisma } from "@prisma/client";
 import type { ZodIssue } from "zod";
 import { ZodError } from "zod";
 

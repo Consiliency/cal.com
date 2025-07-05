@@ -9,7 +9,7 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
-import { EventType, Webhook } from "@calcom/prisma/client";
+import { EventType, Webhook } from "@prisma/client";
 import { Request } from "express";
 
 @Injectable()

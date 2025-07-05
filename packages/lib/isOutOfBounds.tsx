@@ -1,4 +1,4 @@
-import type { EventType } from "@calcom/prisma/client";
+import type { EventType } from "@prisma/client";
 
 import dayjs from "@calcom/dayjs";
 import { PeriodType } from "@calcom/prisma/enums";

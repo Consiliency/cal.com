@@ -4,7 +4,7 @@ import { CredentialsRepository } from "@/modules/credentials/credentials.reposit
 import { BadRequestException, Logger, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import type { Prisma } from "@calcom/prisma/client";
+import type { Prisma } from "@prisma/client";
 import { z } from "zod";
 
 import { ZOOM, ZOOM_TYPE } from "@calcom/platform-constants";

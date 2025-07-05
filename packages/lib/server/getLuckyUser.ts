@@ -1,4 +1,4 @@
-import type { Prisma, User } from "@calcom/prisma/client";
+import type { Prisma, User } from "@prisma/client";
 
 import type { FormResponse, Fields } from "@calcom/app-store/routing-forms/types/types";
 import { zodRoutes } from "@calcom/app-store/routing-forms/zod";

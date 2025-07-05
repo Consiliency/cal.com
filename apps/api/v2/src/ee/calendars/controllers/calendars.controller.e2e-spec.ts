@@ -11,7 +11,7 @@ import { UsersModule } from "@/modules/users/users.module";
 import { INestApplication } from "@nestjs/common";
 import { NestExpressApplication } from "@nestjs/platform-express";
 import { Test } from "@nestjs/testing";
-import { PlatformOAuthClient, Team, User, Credential } from "@calcom/prisma/client";
+import { PlatformOAuthClient, Team, User, Credential } from "@prisma/client";
 import * as request from "supertest";
 import { CredentialsRepositoryFixture } from "test/fixtures/repository/credentials.repository.fixture";
 import { OAuthClientRepositoryFixture } from "test/fixtures/repository/oauth-client.repository.fixture";

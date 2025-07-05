@@ -1,4 +1,4 @@
-import { Prisma } from "@calcom/prisma/client";
+import { Prisma } from "@prisma/client";
 
 //import "server-only";
 import { getLocationGroupedOptions } from "@calcom/app-store/server";

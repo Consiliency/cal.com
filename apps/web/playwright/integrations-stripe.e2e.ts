@@ -1,5 +1,5 @@
 import { expect } from "@playwright/test";
-import type Prisma from "@calcom/prisma/client";
+import type Prisma from "@prisma/client";
 
 import prisma from "@calcom/prisma";
 import { SchedulingType } from "@calcom/prisma/enums";

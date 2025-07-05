@@ -1,4 +1,4 @@
-import type { AppCategories, Prisma } from "@calcom/prisma/client";
+import type { AppCategories, Prisma } from "@prisma/client";
 
 import appStore from "@calcom/app-store";
 import type { EventTypeAppsList } from "@calcom/app-store/utils";

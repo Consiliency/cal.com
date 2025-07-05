@@ -4,7 +4,6 @@ import "@calcom/lib/server/__mocks__/serviceAccountKey";
 import { describe, it, expect, beforeEach, vi } from "vitest";
 
 import { CalendarAppDelegationCredentialInvalidGrantError } from "@calcom/lib/CalendarAppError";
-import { CreationSource } from "@calcom/prisma/enums";
 
 import { handleCreateSelectedCalendars, isSameEmail } from "../route";
 
@@ -24,7 +23,7 @@ const createOrg = async ({ id = 1 }: OrgParams = {}) =>
 
 type UserParams = { id?: number; email?: string };
 const createUser = async ({ id = 1, email = `user${id}@example.com` }: UserParams = {}) =>
-  await prismock.user.create({ data: { id, email, creationSource: CreationSource.WEBAPP } });
+  await prismock.user.create({ data: { id, email } });
 
 type WorkspacePlatformParams = { id?: number };
 const createWorkspacePlatform = async ({ id = 1 }: WorkspacePlatformParams = {}) =>

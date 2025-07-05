@@ -1,4 +1,4 @@
-import type { EventType } from "@calcom/prisma/client";
+import type { EventType } from "@prisma/client";
 import { isValidPhoneNumber } from "libphonenumber-js";
 import { useRouter } from "next/navigation";
 import { z } from "zod";

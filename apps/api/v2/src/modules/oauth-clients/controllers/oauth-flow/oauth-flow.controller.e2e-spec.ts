@@ -13,7 +13,7 @@ import { UsersModule } from "@/modules/users/users.module";
 import { INestApplication } from "@nestjs/common";
 import { NestExpressApplication } from "@nestjs/platform-express";
 import { Test, TestingModule } from "@nestjs/testing";
-import { PlatformOAuthClient, Team, User } from "@calcom/prisma/client";
+import { PlatformOAuthClient, Team, User } from "@prisma/client";
 import * as request from "supertest";
 import { OAuthClientRepositoryFixture } from "test/fixtures/repository/oauth-client.repository.fixture";
 import { OrganizationRepositoryFixture } from "test/fixtures/repository/organization.repository.fixture";

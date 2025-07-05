@@ -1,4 +1,4 @@
-import type { Payment, Webhook } from "@calcom/prisma/client";
+import type { Payment, Webhook } from "@prisma/client";
 import { createHmac } from "crypto";
 import { compile } from "handlebars";
 
