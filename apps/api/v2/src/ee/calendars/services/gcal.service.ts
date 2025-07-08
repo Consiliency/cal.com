@@ -76,7 +76,7 @@ export class GoogleCalendarService implements OAuthCalendarApp {
     const authUrl = oAuth2Client.generateAuthUrl({
       access_type: "offline",
       scope: CALENDAR_SCOPES,
-      prompt: "consent",
+      prompt: "select_account consent",
       state: JSON.stringify(state),
     });
 
