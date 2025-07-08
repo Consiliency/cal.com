@@ -86,8 +86,8 @@ export const PUBLIC_QUICK_AVAILABILITY_ROLLOUT =
 
 /** @deprecated use `WEBAPP_URL` */
 export const NEXT_PUBLIC_BASE_URL = process.env.NEXT_PUBLIC_WEBAPP_URL || `https://${process.env.VERCEL_URL}`;
-export const LOGO = "/calcom-logo-white-word.svg";
-export const LOGO_ICON = "/cal-com-icon-white.svg";
+export const LOGO = "/frontier_strategies_logo.svg";
+export const LOGO_ICON = "/frontier_strategies_logo_with_name.svg";
 export const AVATAR_FALLBACK = "/avatar.svg";
 export const FAVICON_16 = "/favicon-16x16.png";
 export const FAVICON_32 = "/favicon-32x32.png";
