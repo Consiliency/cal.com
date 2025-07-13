@@ -76,8 +76,8 @@ export const generateTeamCheckoutSession = async ({
       : { allow_promotion_codes: true }),
     // @ts-expect-error - return_url replaces success_url/cancel_url in embedded mode
     return_url: `${WEBAPP_URL}/api/teams/create?session_id={CHECKOUT_SESSION_ID}`,
-    success_url: `${WEBAPP_URL}/api/teams/create?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${WEBAPP_URL}/settings/my-account/profile`,
+    success_url: `${WEBAPP_URL}/api/teams/create?session_id={CHECKOUT_SESSION_ID}`,
     line_items: [
       {
         /** We only need to set the base price and we can upsell it directly on Stripe's checkout  */
@@ -181,8 +181,8 @@ export const purchaseTeamOrOrgSubscription = async (input: {
     ui_mode: "embedded",
     allow_promotion_codes: true,
     return_url: `${WEBAPP_URL}/api/teams/${teamId}/upgrade?session_id={CHECKOUT_SESSION_ID}`,
-    success_url: `${WEBAPP_URL}/api/teams/${teamId}/upgrade?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${WEBAPP_URL}/settings/my-account/profile`,
+    success_url: `${WEBAPP_URL}/api/teams/${teamId}/upgrade?session_id={CHECKOUT_SESSION_ID}`,
     line_items: [
       {
         price: priceId,
