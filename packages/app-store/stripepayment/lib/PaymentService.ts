@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 import z from "zod";
 
 import { sendAwaitingPaymentEmailAndSMS } from "@calcom/emails";
+import { WEBAPP_URL } from "@calcom/lib/constants";
 import { ErrorCode } from "@calcom/lib/errorCodes";
 import { getErrorFromUnknown } from "@calcom/lib/errors";
 import logger from "@calcom/lib/logger";
@@ -84,29 +85,43 @@ export class PaymentService implements IAbstractPaymentService {
         bookerPhoneNumber
       );
 
-      const params: Stripe.PaymentIntentCreateParams = {
-        amount: payment.amount,
-        currency: payment.currency,
-        customer: customer.id,
-        automatic_payment_methods: {
-          enabled: true,
+      // Create Embedded Checkout Session instead of Payment Intent
+      const session = await this.stripe.checkout.sessions.create(
+        {
+          mode: "payment",
+          // @ts-expect-error - ui_mode is available in newer Stripe versions
+          ui_mode: "embedded",
+          customer: customer.id,
+          line_items: [
+            {
+              price_data: {
+                currency: payment.currency,
+                product_data: {
+                  name: eventTitle || bookingTitle || "Booking",
+                },
+                unit_amount: payment.amount,
+              },
+              quantity: 1,
+            },
+          ],
+          allow_promotion_codes: true,
+          return_url: `${WEBAPP_URL}/api/booking/${bookingId}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+          metadata: {
+            identifier: "cal.com",
+            bookingId: bookingId.toString(),
+            calAccountId: userId ? userId.toString() : "",
+            calUsername: username || "",
+            bookerName,
+            bookerEmail,
+            bookerPhoneNumber: bookerPhoneNumber || "",
+            eventTitle: eventTitle || "",
+            bookingTitle: bookingTitle || "",
+          },
         },
-        metadata: {
-          identifier: "cal.com",
-          bookingId,
-          calAccountId: userId,
-          calUsername: username,
-          bookerName,
-          bookerEmail: bookerEmail,
-          bookerPhoneNumber: bookerPhoneNumber ?? null,
-          eventTitle: eventTitle || "",
-          bookingTitle: bookingTitle || "",
-        },
-      };
-
-      const paymentIntent = await this.stripe.paymentIntents.create(params, {
-        stripeAccount: this.credentials.stripe_user_id,
-      });
+        {
+          stripeAccount: this.credentials.stripe_user_id,
+        }
+      );
 
       const paymentData = await prisma.payment.create({
         data: {
@@ -123,11 +138,13 @@ export class PaymentService implements IAbstractPaymentService {
           },
           amount: payment.amount,
           currency: payment.currency,
-          externalId: paymentIntent.id,
-          data: Object.assign({}, paymentIntent, {
+          externalId: session.id,
+          data: {
+            sessionId: session.id,
+            clientSecret: (session as any).client_secret,
             stripe_publishable_key: this.credentials.stripe_publishable_key,
             stripeAccount: this.credentials.stripe_user_id,
-          }) as unknown as Prisma.InputJsonValue,
+          } as Prisma.InputJsonValue,
           fee: 0,
           refunded: false,
           success: false,
@@ -311,11 +328,21 @@ export class PaymentService implements IAbstractPaymentService {
         success: true,
         refunded: false,
       });
+
+      const stripeAccount = (payment.data as unknown as StripePaymentData)["stripeAccount"];
+
+      // For checkout sessions, we need to get the payment intent ID first
+      const session = await this.stripe.checkout.sessions.retrieve(payment.externalId, { stripeAccount });
+
+      if (!session.payment_intent) {
+        throw new Error("No payment intent found for session");
+      }
+
       const refund = await this.stripe.refunds.create(
         {
-          payment_intent: payment.externalId,
+          payment_intent: session.payment_intent as string,
         },
-        { stripeAccount: (payment.data as unknown as StripePaymentData)["stripeAccount"] }
+        { stripeAccount }
       );
 
       if (!refund || refund.status === "failed") {
@@ -377,18 +404,15 @@ export class PaymentService implements IAbstractPaymentService {
       if (!stripeAccount) {
         throw new Error("Stripe account not found");
       }
-      // Expire all current sessions
-      const sessions = await this.stripe.checkout.sessions.list(
-        {
-          payment_intent: payment.externalId,
-        },
-        { stripeAccount }
-      );
-      for (const session of sessions.data) {
-        await this.stripe.checkout.sessions.expire(session.id, { stripeAccount });
+
+      // For checkout sessions, we need to expire the session
+      try {
+        await this.stripe.checkout.sessions.expire(payment.externalId, { stripeAccount });
+      } catch (e) {
+        // If it's already expired or completed, that's fine
+        log.info("Session may already be expired or completed", payment.externalId);
       }
-      // Then cancel the payment intent
-      await this.stripe.paymentIntents.cancel(payment.externalId, { stripeAccount });
+
       return true;
     } catch (e) {
       log.error("Stripe: Unable to delete Payment in stripe of paymentId", paymentId, safeStringify(e));

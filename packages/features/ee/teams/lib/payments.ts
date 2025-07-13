@@ -61,6 +61,7 @@ export const generateTeamCheckoutSession = async ({
   const session = await stripe.checkout.sessions.create({
     customer,
     mode: "subscription",
+    ui_mode: "embedded",
     ...(dubCustomer?.discount?.couponId
       ? {
           discounts: [
@@ -73,6 +74,8 @@ export const generateTeamCheckoutSession = async ({
           ],
         }
       : { allow_promotion_codes: true }),
+    // @ts-expect-error - return_url replaces success_url/cancel_url in embedded mode
+    return_url: `${WEBAPP_URL}/api/teams/create?session_id={CHECKOUT_SESSION_ID}`,
     success_url: `${WEBAPP_URL}/api/teams/create?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${WEBAPP_URL}/settings/my-account/profile`,
     line_items: [
@@ -100,7 +103,10 @@ export const generateTeamCheckoutSession = async ({
       dubCustomerId: userId, // pass the userId during checkout creation for sales conversion tracking: https://d.to/conversions/stripe
     },
   });
-  return session;
+  return {
+    url: session.url,
+    clientSecret: (session as any).client_secret,
+  };
 };
 
 /**
@@ -171,7 +177,10 @@ export const purchaseTeamOrOrgSubscription = async (input: {
   const session = await stripe.checkout.sessions.create({
     customer,
     mode: "subscription",
+    // @ts-expect-error - ui_mode is available in newer Stripe versions
+    ui_mode: "embedded",
     allow_promotion_codes: true,
+    return_url: `${WEBAPP_URL}/api/teams/${teamId}/upgrade?session_id={CHECKOUT_SESSION_ID}`,
     success_url: `${WEBAPP_URL}/api/teams/${teamId}/upgrade?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${WEBAPP_URL}/settings/my-account/profile`,
     line_items: [
@@ -197,7 +206,10 @@ export const purchaseTeamOrOrgSubscription = async (input: {
       },
     },
   });
-  return { url: session.url };
+  return {
+    url: session.url,
+    clientSecret: (session as any).client_secret,
+  };
 
   async function createPrice({
     isOrg,

@@ -102,27 +102,23 @@ export const PaymentFormComponent = (
             setIsCanceling(true);
             props.onCancel();
           }}>
-          <span id="button-text">{t("cancel")}</span>
+          {t("cancel")}
         </Button>
         <Button
           type="submit"
+          form="payment-form"
           disabled={disableButtons}
-          loading={state.status === "processing"}
-          id="submit"
-          color="secondary">
-          <span id="button-text">
-            {state.status === "processing" ? (
-              <div className="spinner" id="spinner" />
-            ) : paymentOption === "HOLD" ? (
-              t("submit_card")
-            ) : (
-              t("pay_now")
-            )}
-          </span>
+          loading={state.status === "processing"}>
+          {paymentOption === "HOLD"
+            ? t("submit_card_info")
+            : t("pay_now", {
+                amount: props.payment.amount / 100,
+                formatParams: { amount: { currency: props.payment.currency } },
+              })}
         </Button>
       </div>
       {state.status === "error" && (
-        <div className="mt-4 text-center text-red-900 dark:text-gray-300" role="alert">
+        <div className="mt-4 rounded-md bg-red-50 p-4 text-xs text-red-800" role="alert">
           {state.error.message}
         </div>
       )}
@@ -130,29 +126,31 @@ export const PaymentFormComponent = (
   );
 };
 
-const PaymentForm = (props: Props) => {
-  const {
-    user: { username },
-  } = props;
-  const { t } = useLocale();
+export const PaymentForm = (props: Props) => {
   const router = useRouter();
   const searchParams = useCompatSearchParams();
   const [state, setState] = useState<States>({ status: "idle" });
   const stripe = useStripe();
   const elements = useElements();
   const paymentOption = props.payment.paymentOption;
+  const [isValid, setIsValid] = useState<boolean>(false);
   const bookingSuccessRedirect = useBookingSuccessRedirect();
+
+  const onCancel = () => {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    if (parent.location.hostname === "app.cal.com" && parent?.window?.close) {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      return parent.window.close();
+    }
+    return router.back();
+  };
 
   const handleSubmit = async (ev: SyntheticEvent) => {
     ev.preventDefault();
 
-    if (!stripe || !elements || searchParams === null) {
-      return;
-    }
-
-    if (!stripe || !elements) {
-      return;
-    }
+    if (!stripe || !elements || !isValid) return;
 
     setState({ status: "processing" });
 
@@ -161,101 +159,72 @@ const PaymentForm = (props: Props) => {
       uid: string;
       email: string | null;
       location?: string;
-      payment_intent?: string;
-      payment_intent_client_secret?: string;
-      redirect_status?: string;
     } = {
       uid: props.booking.uid,
       email: searchParams?.get("email"),
     };
+
+    if (props.location) {
+      if (props.location.includes("integration")) {
+        params.location = t("web_conferencing_details_to_follow");
+      } else {
+        params.location = props.location;
+      }
+    }
+
     if (paymentOption === "HOLD" && "setupIntent" in props.payment.data) {
       payload = await stripe.confirmSetup({
         elements,
-        redirect: "if_required",
+        confirmParams: {
+          return_url: `${WEBAPP_URL}/booking/${props.booking.uid}`,
+        },
       });
-      if (payload.setupIntent) {
-        params.payment_intent = payload.setupIntent.id;
-        params.payment_intent_client_secret = payload.setupIntent.client_secret || undefined;
-        params.redirect_status = payload.setupIntent.status;
-      }
     } else if (paymentOption === "ON_BOOKING") {
       payload = await stripe.confirmPayment({
         elements,
         confirmParams: {
-          return_url: `${WEBAPP_URL}/booking/${params.uid}`,
+          return_url: bookingSuccessRedirect({
+            successRedirectUrl: props.eventType.successRedirectUrl,
+            query: params,
+            booking: props.booking,
+            forwardParamsSuccessRedirect: props.eventType.forwardParamsSuccessRedirect,
+          }),
         },
-        redirect: "if_required",
       });
-      if (payload.paymentIntent) {
-        params.payment_intent = payload.paymentIntent.id;
-        params.payment_intent_client_secret = payload.paymentIntent.client_secret || undefined;
-        params.redirect_status = payload.paymentIntent.status;
-      }
     }
 
+    // @ts-expect-error payload is inferred as unknown
     if (payload?.error) {
       setState({
         status: "error",
-        error: new Error(`Payment failed: ${payload.error.message}`),
+        // @ts-expect-error payload is inferred as unknown
+        error: new Error(payload.error.message),
       });
     } else {
-      if (props.location) {
-        if (props.location.includes("integration")) {
-          params.location = t("web_conferencing_details_to_follow");
-        } else {
-          params.location = props.location;
-        }
-      }
-
-      return bookingSuccessRedirect({
-        successRedirectUrl: props.eventType.successRedirectUrl,
-        query: params,
-        booking: props.booking,
-        forwardParamsSuccessRedirect: props.eventType.forwardParamsSuccessRedirect,
-      });
+      setState({ status: "ok" });
     }
   };
 
-  return (
-    <PaymentFormComponent
-      {...props}
-      elements={elements}
-      paymentOption={paymentOption}
-      state={state}
-      onSubmit={handleSubmit}
-      onCancel={() => {
-        if (username) {
-          return router.push(`/${username}`);
-        }
-        return router.back();
-      }}
-      onPaymentElementChange={() => {
-        setState({ status: "idle" });
-      }}
-    />
-  );
-};
-
-export default function PaymentComponent(props: Props) {
-  const stripePromise = getStripe(props.payment.data.stripe_publishable_key as any);
-  const [theme, setTheme] = useState<"stripe" | "night">("stripe");
-
-  useEffect(() => {
-    if (document.documentElement.classList.contains("dark")) {
-      setTheme("night");
-    }
-  }, []);
+  const { t } = useLocale();
 
   return (
     <Elements
-      stripe={stripePromise}
       options={{
         clientSecret: props.clientSecret,
-        appearance: {
-          theme,
-        },
-      }}>
-      <PaymentForm {...props} />
+        stripeAccount: props.payment.data.stripeAccount as string,
+      }}
+      stripe={getStripe(props.payment.data.stripe_publishable_key as string)}>
+      <PaymentFormComponent
+        {...props}
+        paymentOption={paymentOption}
+        onSubmit={handleSubmit}
+        onCancel={onCancel}
+        onPaymentElementChange={() => setIsValid(true)}
+        elements={elements}
+        state={state}
+      />
     </Elements>
   );
-}
+};
+
+export default PaymentForm;
