@@ -85,6 +85,24 @@ export class PaymentService implements IAbstractPaymentService {
         bookerPhoneNumber
       );
 
+      // Get booking details to check for Stripe metadata
+      const booking = await prisma.booking.findUnique({
+        where: { id: bookingId },
+        select: {
+          eventType: {
+            select: {
+              metadata: true,
+            },
+          },
+        },
+      });
+
+      let stripePriceId: string | undefined;
+      if (booking?.eventType?.metadata && typeof booking.eventType.metadata === "object") {
+        const metadata = booking.eventType.metadata as any;
+        stripePriceId = metadata?.apps?.stripe?.stripePriceId;
+      }
+
       // Create Embedded Checkout Session instead of Payment Intent
       const session = await this.stripe.checkout.sessions.create(
         {
@@ -93,16 +111,21 @@ export class PaymentService implements IAbstractPaymentService {
           ui_mode: "embedded",
           customer: customer.id,
           line_items: [
-            {
-              price_data: {
-                currency: payment.currency,
-                product_data: {
-                  name: eventTitle || bookingTitle || "Booking",
+            stripePriceId
+              ? {
+                  price: stripePriceId,
+                  quantity: 1,
+                }
+              : {
+                  price_data: {
+                    currency: payment.currency,
+                    product_data: {
+                      name: eventTitle || bookingTitle || "Booking",
+                    },
+                    unit_amount: payment.amount,
+                  },
+                  quantity: 1,
                 },
-                unit_amount: payment.amount,
-              },
-              quantity: 1,
-            },
           ],
           allow_promotion_codes: true,
           return_url: `${WEBAPP_URL}/api/booking/${bookingId}/payment-success?session_id={CHECKOUT_SESSION_ID}`,

@@ -19,6 +19,22 @@ import { currencyOptions } from "../lib/currencyOptions";
 
 type Option = { value: string; label: string };
 
+type StripeProduct = {
+  id: string;
+  name: string;
+  description: string | null;
+  prices: {
+    id: string;
+    currency: string;
+    unit_amount: number | null;
+    nickname: string | null;
+    recurring: {
+      interval: string;
+      interval_count: number;
+    } | null;
+  }[];
+};
+
 const EventTypeAppSettingsInterface: EventTypeAppSettingsComponent = ({
   getAppData,
   setAppData,
@@ -39,6 +55,14 @@ const EventTypeAppSettingsInterface: EventTypeAppSettingsComponent = ({
   const getSelectedOption = () =>
     options.find((opt) => opt.value === (getAppData("refundCountCalendarDays") === true ? 1 : 0));
 
+  // New state for product selection
+  const pricingMode = getAppData("pricingMode") || "custom_price";
+  const [stripeProducts, setStripeProducts] = useState<StripeProduct[]>([]);
+  const [loadingProducts, setLoadingProducts] = useState(false);
+  const [productError, setProductError] = useState<string | null>(null);
+  const selectedProductId = getAppData("stripeProductId");
+  const selectedPriceId = getAppData("stripePriceId");
+
   const { t } = useLocale();
   const recurringEventDefined = eventType.recurringEvent?.count !== undefined;
   const seatsEnabled = !!eventType.seatsPerTimeSlot;
@@ -53,6 +77,26 @@ const EventTypeAppSettingsInterface: EventTypeAppSettingsComponent = ({
       .replace(/\d/g, "")
       .trim();
 
+  // Fetch Stripe products
+  const fetchStripeProducts = async () => {
+    setLoadingProducts(true);
+    setProductError(null);
+    try {
+      const response = await fetch("/api/integrations/stripe/products");
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to fetch products");
+      }
+      const data = await response.json();
+      setStripeProducts(data.products || []);
+    } catch (error) {
+      console.error("Error fetching Stripe products:", error);
+      setProductError(error instanceof Error ? error.message : "Failed to fetch products");
+    } finally {
+      setLoadingProducts(false);
+    }
+  };
+
   useEffect(() => {
     if (requirePayment) {
       if (!getAppData("currency")) {
@@ -61,12 +105,16 @@ const EventTypeAppSettingsInterface: EventTypeAppSettingsComponent = ({
       if (!getAppData("paymentOption")) {
         setAppData("paymentOption", paymentOptions[0].value);
       }
+      // Fetch products when payment is enabled and pricing mode is stripe_product
+      if (pricingMode === "stripe_product") {
+        fetchStripeProducts();
+      }
     }
 
     if (!getAppData("refundPolicy")) {
       setAppData("refundPolicy", RefundPolicy.NEVER);
     }
-  }, [requirePayment, getAppData, setAppData]);
+  }, [requirePayment, getAppData, setAppData, pricingMode]);
 
   const options = [
     { value: 0, label: t("business_days") },
@@ -79,50 +127,177 @@ const EventTypeAppSettingsInterface: EventTypeAppSettingsComponent = ({
       )}
       {!recurringEventDefined && requirePayment && (
         <>
-          <div className="mt-4 block items-center justify-start sm:flex sm:space-x-2">
-            <TextField
-              data-testid="stripe-price-input"
-              label={t("price")}
-              className="h-[38px]"
-              addOnLeading={
-                <>{selectedCurrency.value ? getCurrencySymbol("en", selectedCurrency.value) : ""}</>
-              }
-              addOnSuffix={currency.toUpperCase()}
-              addOnClassname="h-[38px]"
-              step="0.01"
-              min="0.5"
-              type="number"
-              required
-              placeholder="Price"
-              disabled={disabled}
-              onChange={(e) => {
-                setAppData("price", convertToSmallestCurrencyUnit(Number(e.target.value), currency));
-              }}
-              value={price > 0 ? convertFromSmallestToPresentableCurrencyUnit(price, currency) : undefined}
-            />
-          </div>
-          <div className="mt-5 w-60">
-            <label className="text-default mb-1 block text-sm font-medium" htmlFor="currency">
-              {t("currency")}
-            </label>
-            <Select
-              data-testid="stripe-currency-select"
-              variant="default"
-              options={currencyOptions}
-              innerClassNames={{
-                input: "stripe-currency-input",
-              }}
-              value={selectedCurrency}
-              className="text-black"
-              defaultValue={selectedCurrency}
-              onChange={(e) => {
-                if (e) {
-                  setSelectedCurrency(e);
-                  setAppData("currency", e.value);
+          {/* Pricing Mode Selection */}
+          <div className="mt-4">
+            <label className="text-default mb-2 block text-sm font-medium">{t("pricing_type")}</label>
+            <RadioGroup.Root
+              defaultValue={pricingMode}
+              value={pricingMode}
+              onValueChange={(val) => {
+                setAppData("pricingMode", val);
+                // Clear product selection when switching to custom price
+                if (val === "custom_price") {
+                  setAppData("stripeProductId", undefined);
+                  setAppData("stripePriceId", undefined);
                 }
               }}
-            />
+              className="flex flex-col space-y-2">
+              <RadioField
+                label={t("use_stripe_product")}
+                value="stripe_product"
+                id="stripe_product"
+                disabled={disabled}
+              />
+              <RadioField
+                label={t("custom_price")}
+                value="custom_price"
+                id="custom_price"
+                disabled={disabled}
+              />
+            </RadioGroup.Root>
           </div>
+
+          {/* Stripe Product Selection */}
+          {pricingMode === "stripe_product" && (
+            <div className="mt-4">
+              <label className="text-default mb-1 block text-sm font-medium">
+                {t("select_stripe_product")}
+              </label>
+              {loadingProducts && <div className="text-sm text-gray-500">{t("loading_products")}</div>}
+              {productError && (
+                <Alert severity="error" title={t("error_loading_products")} message={productError} />
+              )}
+              {!loadingProducts && !productError && (
+                <Select<{
+                  value: string;
+                  label: string;
+                  product: StripeProduct;
+                  price: StripeProduct["prices"][0];
+                }>
+                  isSearchable
+                  placeholder={t("select_product")}
+                  options={stripeProducts.flatMap((product) =>
+                    product.prices.map((price) => ({
+                      value: `${product.id}|${price.id}`,
+                      label: `${product.name} - ${
+                        price.unit_amount
+                          ? new Intl.NumberFormat("en-US", {
+                              style: "currency",
+                              currency: price.currency.toUpperCase(),
+                            }).format(price.unit_amount / 100)
+                          : "Variable"
+                      }${price.recurring ? ` / ${price.recurring.interval}` : ""}`,
+                      product,
+                      price,
+                    }))
+                  )}
+                  value={
+                    selectedProductId && selectedPriceId
+                      ? stripeProducts
+                          .flatMap((product) =>
+                            product.prices.map((price) => ({
+                              value: `${product.id}|${price.id}`,
+                              label: `${product.name} - ${
+                                price.unit_amount
+                                  ? new Intl.NumberFormat("en-US", {
+                                      style: "currency",
+                                      currency: price.currency.toUpperCase(),
+                                    }).format(price.unit_amount / 100)
+                                  : "Variable"
+                              }${price.recurring ? ` / ${price.recurring.interval}` : ""}`,
+                              product,
+                              price,
+                            }))
+                          )
+                          .find((opt) => opt.value === `${selectedProductId}|${selectedPriceId}`)
+                      : undefined
+                  }
+                  onChange={(selected) => {
+                    if (selected) {
+                      const [productId, priceId] = selected.value.split("|");
+                      setAppData("stripeProductId", productId);
+                      setAppData("stripePriceId", priceId);
+                      // Update currency from the selected price
+                      if (selected.price) {
+                        setAppData("currency", selected.price.currency.toUpperCase());
+                        if (selected.price.unit_amount) {
+                          setAppData("price", selected.price.unit_amount);
+                        }
+                      }
+                    }
+                  }}
+                  isDisabled={disabled || loadingProducts || !!productError}
+                  className="w-full"
+                />
+              )}
+              {stripeProducts.length === 0 && !loadingProducts && !productError && (
+                <p className="mt-2 text-sm text-gray-500">
+                  {t("no_products_found")}{" "}
+                  <a
+                    href="https://dashboard.stripe.com/products"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline">
+                    {t("create_in_stripe")}
+                  </a>
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Custom Price Fields - Only show when custom_price is selected */}
+          {pricingMode === "custom_price" && (
+            <div className="mt-4 block items-center justify-start sm:flex sm:space-x-2">
+              <TextField
+                data-testid="stripe-price-input"
+                label={t("price")}
+                className="h-[38px]"
+                addOnLeading={
+                  <>{selectedCurrency.value ? getCurrencySymbol("en", selectedCurrency.value) : ""}</>
+                }
+                addOnSuffix={currency.toUpperCase()}
+                addOnClassname="h-[38px]"
+                step="0.01"
+                min="0.5"
+                type="number"
+                required
+                placeholder="Price"
+                disabled={disabled}
+                onChange={(e) => {
+                  setAppData("price", convertToSmallestCurrencyUnit(Number(e.target.value), currency));
+                }}
+                value={price > 0 ? convertFromSmallestToPresentableCurrencyUnit(price, currency) : undefined}
+              />
+            </div>
+          )}
+
+          {/* Currency Selector - Show for custom price mode */}
+          {pricingMode === "custom_price" && (
+            <div className="mt-5 w-60">
+              <label className="text-default mb-1 block text-sm font-medium" htmlFor="currency">
+                {t("currency")}
+              </label>
+              <Select
+                data-testid="stripe-currency-select"
+                variant="default"
+                options={currencyOptions}
+                innerClassNames={{
+                  input: "stripe-currency-input",
+                }}
+                value={selectedCurrency}
+                className="text-black"
+                defaultValue={selectedCurrency}
+                onChange={(e) => {
+                  if (e) {
+                    setSelectedCurrency(e);
+                    setAppData("currency", e.value);
+                  }
+                }}
+              />
+            </div>
+          )}
+
+          {/* Payment Option - Show for both modes */}
           <div className="mt-4 w-60">
             <label className="text-default mb-1 block text-sm font-medium" htmlFor="currency">
               {t("payment_option")}
