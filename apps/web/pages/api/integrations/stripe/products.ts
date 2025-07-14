@@ -18,8 +18,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    // Get credentialId from query params if provided
-    const { credentialId } = req.query;
+    // Get credentialId and debug flag from query params
+    const { credentialId, debug } = req.query;
+    const isDebug = debug === "true";
     
     // Get the Stripe credentials - either specific credential by ID or user's credentials
     const credential = await prisma.credential.findFirst({
@@ -35,6 +36,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
 
     if (!credential || !credential.key) {
+      log.error("Stripe credential not found", { credentialId, userId: session.user.id });
       return res.status(404).json({ error: "Stripe not connected" });
     }
 
@@ -42,8 +44,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const stripeUserId = credentialKey.stripe_user_id;
 
     if (!stripeUserId) {
+      log.error("Invalid Stripe credentials - no stripe_user_id", { credentialId: credential.id });
       return res.status(400).json({ error: "Invalid Stripe credentials" });
     }
+
+    log.info("Fetching Stripe products", { 
+      stripeUserId, 
+      credentialId: credential.id,
+      userId: credential.userId,
+      teamId: credential.teamId 
+    });
 
     // Initialize Stripe with the platform's key
     const stripe = new Stripe(process.env.STRIPE_PRIVATE_KEY || "", {
@@ -73,6 +83,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       ),
     ]);
 
+    log.info("Stripe API results", {
+      productsCount: products.data.length,
+      pricesCount: prices.data.length,
+      productIds: products.data.map(p => p.id),
+      priceIds: prices.data.map(p => p.id)
+    });
+
     // Group prices by product
     const pricesByProduct = prices.data.reduce((acc, price) => {
       const productId = typeof price.product === "string" ? price.product : price.product.id;
@@ -82,6 +99,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       acc[productId].push(price);
       return acc;
     }, {} as Record<string, Stripe.Price[]>);
+
+    // Count products filtered out
+    const productsWithoutPrices = products.data.filter((product) => !pricesByProduct[product.id]);
+    if (productsWithoutPrices.length > 0) {
+      log.info("Products without prices", {
+        count: productsWithoutPrices.length,
+        productIds: productsWithoutPrices.map(p => p.id)
+      });
+    }
 
     // Format the response
     const formattedProducts = products.data
@@ -104,6 +130,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         };
       })
       .filter((product) => product.prices.length > 0); // Ensure product has at least one price
+
+    log.info("Formatted products", {
+      count: formattedProducts.length,
+      products: formattedProducts.map(p => ({ id: p.id, name: p.name, priceCount: p.prices.length }))
+    });
+
+    // If debug mode, include raw data
+    if (isDebug) {
+      return res.status(200).json({ 
+        products: formattedProducts,
+        debug: {
+          stripeUserId,
+          credentialId: credential.id,
+          rawProductsCount: products.data.length,
+          rawPricesCount: prices.data.length,
+          formattedProductsCount: formattedProducts.length,
+          productsWithoutPrices: productsWithoutPrices.map(p => ({ id: p.id, name: p.name }))
+        }
+      });
+    }
 
     return res.status(200).json({ products: formattedProducts });
   } catch (error) {

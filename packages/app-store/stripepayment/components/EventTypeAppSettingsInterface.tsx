@@ -84,14 +84,25 @@ const EventTypeAppSettingsInterface: EventTypeAppSettingsComponent = ({
     try {
       // Get the credentialId from app data if available
       const credentialId = getAppData("credentialId");
-      const queryParams = credentialId ? `?credentialId=${credentialId}` : "";
+      const params = new URLSearchParams();
+      if (credentialId) {
+        params.append("credentialId", credentialId.toString());
+      }
+      // Add debug flag to get more info
+      params.append("debug", "true");
       
-      const response = await fetch(`/api/integrations/stripe/products${queryParams}`);
+      const response = await fetch(`/api/integrations/stripe/products${params.toString() ? `?${params.toString()}` : ""}`);
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.error || "Failed to fetch products");
       }
       const data = await response.json();
+      
+      // Log debug info if available
+      if (data.debug) {
+        console.log("Stripe Products Debug Info:", data.debug);
+      }
+      
       setStripeProducts(data.products || []);
     } catch (error) {
       console.error("Error fetching Stripe products:", error);
