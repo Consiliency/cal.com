@@ -18,12 +18,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    // Get the user's Stripe credentials
+    // Get credentialId from query params if provided
+    const { credentialId } = req.query;
+    
+    // Get the Stripe credentials - either specific credential by ID or user's credentials
     const credential = await prisma.credential.findFirst({
-      where: {
-        userId: session.user.id,
-        type: "stripe_payment",
-      },
+      where: credentialId
+        ? {
+            id: parseInt(credentialId as string),
+            type: "stripe_payment",
+          }
+        : {
+            userId: session.user.id,
+            type: "stripe_payment",
+          },
     });
 
     if (!credential || !credential.key) {

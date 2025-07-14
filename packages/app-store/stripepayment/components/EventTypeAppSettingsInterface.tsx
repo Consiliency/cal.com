@@ -82,7 +82,11 @@ const EventTypeAppSettingsInterface: EventTypeAppSettingsComponent = ({
     setLoadingProducts(true);
     setProductError(null);
     try {
-      const response = await fetch("/api/integrations/stripe/products");
+      // Get the credentialId from app data if available
+      const credentialId = getAppData("credentialId");
+      const queryParams = credentialId ? `?credentialId=${credentialId}` : "";
+      
+      const response = await fetch(`/api/integrations/stripe/products${queryParams}`);
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.error || "Failed to fetch products");
