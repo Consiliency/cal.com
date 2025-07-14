@@ -18,9 +18,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    // Get credentialId and debug flag from query params
-    const { credentialId, debug } = req.query;
+    // Get query params
+    const { credentialId, debug, usePlatformAccount } = req.query;
     const isDebug = debug === "true";
+    const shouldUsePlatformAccount = usePlatformAccount === "true";
     
     // Get the Stripe credentials - either specific credential by ID or user's credentials
     const credential = await prisma.credential.findFirst({
@@ -60,16 +61,38 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       apiVersion: "2020-08-27",
     });
 
-    // Fetch products and prices from the connected account
+    // Get platform account info
+    let platformAccountId = "unknown";
+    try {
+      const platformAccount = await stripe.accounts.retrieve();
+      platformAccountId = platformAccount.id;
+    } catch (e) {
+      log.warn("Could not retrieve platform account info", e);
+    }
+
+    // Determine which account to use
+    const accountToQuery = shouldUsePlatformAccount ? undefined : stripeUserId;
+    const accountType = shouldUsePlatformAccount ? "platform" : "connected";
+    
+    log.info("Account comparison", {
+      platformAccountId,
+      connectedAccountId: stripeUserId,
+      queryingAccount: accountToQuery || platformAccountId,
+      accountType,
+      isUsingConnectedAccount: !shouldUsePlatformAccount,
+      areSameAccount: platformAccountId === stripeUserId
+    });
+
+    // Fetch products and prices from the appropriate account
+    const stripeOptions = shouldUsePlatformAccount ? {} : { stripeAccount: stripeUserId };
+    
     const [products, prices] = await Promise.all([
       stripe.products.list(
         {
           active: true,
           limit: 100,
         },
-        {
-          stripeAccount: stripeUserId,
-        }
+        stripeOptions
       ),
       stripe.prices.list(
         {
@@ -77,9 +100,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           limit: 100,
           expand: ["data.product"],
         },
-        {
-          stripeAccount: stripeUserId,
-        }
+        stripeOptions
       ),
     ]);
 
@@ -141,12 +162,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(200).json({ 
         products: formattedProducts,
         debug: {
-          stripeUserId,
-          credentialId: credential.id,
-          rawProductsCount: products.data.length,
-          rawPricesCount: prices.data.length,
-          formattedProductsCount: formattedProducts.length,
-          productsWithoutPrices: productsWithoutPrices.map(p => ({ id: p.id, name: p.name }))
+          accounts: {
+            platformAccountId,
+            connectedAccountId: stripeUserId,
+            queriedAccount: accountToQuery || platformAccountId,
+            accountType,
+            isUsingConnectedAccount: !shouldUsePlatformAccount,
+            areSameAccount: platformAccountId === stripeUserId
+          },
+          credential: {
+            id: credential.id,
+            userId: credential.userId,
+            teamId: credential.teamId
+          },
+          results: {
+            rawProductsCount: products.data.length,
+            rawPricesCount: prices.data.length,
+            formattedProductsCount: formattedProducts.length,
+            productsWithoutPrices: productsWithoutPrices.map(p => ({ id: p.id, name: p.name }))
+          }
         }
       });
     }

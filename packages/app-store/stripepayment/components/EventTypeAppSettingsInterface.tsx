@@ -78,7 +78,7 @@ const EventTypeAppSettingsInterface: EventTypeAppSettingsComponent = ({
       .trim();
 
   // Fetch Stripe products
-  const fetchStripeProducts = async () => {
+  const fetchStripeProducts = async (usePlatformAccount = false) => {
     setLoadingProducts(true);
     setProductError(null);
     try {
@@ -91,6 +91,11 @@ const EventTypeAppSettingsInterface: EventTypeAppSettingsComponent = ({
       // Add debug flag to get more info
       params.append("debug", "true");
       
+      // Add platform account flag if needed
+      if (usePlatformAccount) {
+        params.append("usePlatformAccount", "true");
+      }
+      
       const response = await fetch(`/api/integrations/stripe/products${params.toString() ? `?${params.toString()}` : ""}`);
       if (!response.ok) {
         const error = await response.json();
@@ -101,6 +106,11 @@ const EventTypeAppSettingsInterface: EventTypeAppSettingsComponent = ({
       // Log debug info if available
       if (data.debug) {
         console.log("Stripe Products Debug Info:", data.debug);
+        
+        // If no products found in connected account, suggest trying platform account
+        if (data.debug.results.formattedProductsCount === 0 && !usePlatformAccount && data.debug.accounts.isUsingConnectedAccount) {
+          console.log("No products found in connected account. Try fetching from platform account by calling: fetchStripeProducts(true)");
+        }
       }
       
       setStripeProducts(data.products || []);
@@ -130,6 +140,20 @@ const EventTypeAppSettingsInterface: EventTypeAppSettingsComponent = ({
       setAppData("refundPolicy", RefundPolicy.NEVER);
     }
   }, [requirePayment, getAppData, setAppData, pricingMode]);
+
+  // Expose fetchStripeProducts to window for debugging
+  useEffect(() => {
+    if (typeof window !== "undefined" && pricingMode === "stripe_product") {
+      (window as any).fetchStripeProducts = fetchStripeProducts;
+      console.log("Debug: You can now call window.fetchStripeProducts(true) to fetch from platform account");
+    }
+    
+    return () => {
+      if (typeof window !== "undefined") {
+        delete (window as any).fetchStripeProducts;
+      }
+    };
+  }, [pricingMode]);
 
   const options = [
     { value: 0, label: t("business_days") },
