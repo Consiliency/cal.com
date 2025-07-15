@@ -45,7 +45,7 @@ export class PaymentService implements IAbstractPaymentService {
       this.credentials = null;
     }
     this.stripe = new Stripe(process.env.STRIPE_PRIVATE_KEY || "", {
-      apiVersion: "2023-10-16",
+      apiVersion: "2020-08-27",
     });
   }
 
