@@ -1975,16 +1975,34 @@ async function handler(
 
     // Convert type of eventTypePaymentAppCredential to appId: EventTypeAppList
     if (!booking.user) booking.user = organizerUser;
-    const payment = await handlePayment({
-      evt,
-      selectedEventType: eventType,
-      paymentAppCredentials: eventTypePaymentAppCredential as IEventTypePaymentCredentialType,
-      booking,
-      bookerName: fullName,
-      bookerEmail,
-      bookerPhoneNumber,
-      isDryRun,
-    });
+
+    let payment;
+    try {
+      payment = await handlePayment({
+        evt,
+        selectedEventType: eventType,
+        paymentAppCredentials: eventTypePaymentAppCredential as IEventTypePaymentCredentialType,
+        booking,
+        bookerName: fullName,
+        bookerEmail,
+        bookerPhoneNumber,
+        isDryRun,
+      });
+    } catch (error) {
+      loggerWithEventDetails.error("Payment creation failed", safeStringify(error));
+      if (error instanceof Error && error.message === "payment_not_created_error") {
+        throw new HttpError({
+          statusCode: 402, // Payment Required
+          message: "Payment could not be created. Please try again.",
+          cause: error,
+        });
+      }
+      throw new HttpError({
+        statusCode: 400,
+        message: "Payment processing failed",
+        cause: error,
+      });
+    }
     const subscriberOptionsPaymentInitiated: GetSubscriberOptions = {
       userId: triggerForUser ? organizerUser.id : null,
       eventTypeId,

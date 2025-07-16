@@ -22,7 +22,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const { credentialId, debug, usePlatformAccount } = req.query;
     const isDebug = debug === "true";
     const shouldUsePlatformAccount = usePlatformAccount === "true";
-    
+
     // Get the Stripe credentials - either specific credential by ID or user's credentials
     const credential = await prisma.credential.findFirst({
       where: credentialId
@@ -49,16 +49,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ error: "Invalid Stripe credentials" });
     }
 
-    log.info("Fetching Stripe products", { 
-      stripeUserId, 
+    log.info("Fetching Stripe products", {
+      stripeUserId,
       credentialId: credential.id,
       userId: credential.userId,
-      teamId: credential.teamId 
+      teamId: credential.teamId,
     });
 
     // Initialize Stripe with the platform's key
     const stripe = new Stripe(process.env.STRIPE_PRIVATE_KEY || "", {
-      apiVersion: "2020-08-27",
+      apiVersion: "2023-10-16",
     });
 
     // Get platform account info
@@ -73,19 +73,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Determine which account to use
     const accountToQuery = shouldUsePlatformAccount ? undefined : stripeUserId;
     const accountType = shouldUsePlatformAccount ? "platform" : "connected";
-    
+
     log.info("Account comparison", {
       platformAccountId,
       connectedAccountId: stripeUserId,
       queryingAccount: accountToQuery || platformAccountId,
       accountType,
       isUsingConnectedAccount: !shouldUsePlatformAccount,
-      areSameAccount: platformAccountId === stripeUserId
+      areSameAccount: platformAccountId === stripeUserId,
     });
 
     // Fetch products and prices from the appropriate account
     const stripeOptions = shouldUsePlatformAccount ? {} : { stripeAccount: stripeUserId };
-    
+
     const [products, prices] = await Promise.all([
       stripe.products.list(
         {
@@ -107,8 +107,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     log.info("Stripe API results", {
       productsCount: products.data.length,
       pricesCount: prices.data.length,
-      productIds: products.data.map(p => p.id),
-      priceIds: prices.data.map(p => p.id)
+      productIds: products.data.map((p) => p.id),
+      priceIds: prices.data.map((p) => p.id),
     });
 
     // Group prices by product
@@ -126,7 +126,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (productsWithoutPrices.length > 0) {
       log.info("Products without prices", {
         count: productsWithoutPrices.length,
-        productIds: productsWithoutPrices.map(p => p.id)
+        productIds: productsWithoutPrices.map((p) => p.id),
       });
     }
 
@@ -154,12 +154,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     log.info("Formatted products", {
       count: formattedProducts.length,
-      products: formattedProducts.map(p => ({ id: p.id, name: p.name, priceCount: p.prices.length }))
+      products: formattedProducts.map((p) => ({ id: p.id, name: p.name, priceCount: p.prices.length })),
     });
 
     // If debug mode, include raw data
     if (isDebug) {
-      return res.status(200).json({ 
+      return res.status(200).json({
         products: formattedProducts,
         debug: {
           accounts: {
@@ -168,20 +168,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             queriedAccount: accountToQuery || platformAccountId,
             accountType,
             isUsingConnectedAccount: !shouldUsePlatformAccount,
-            areSameAccount: platformAccountId === stripeUserId
+            areSameAccount: platformAccountId === stripeUserId,
           },
           credential: {
             id: credential.id,
             userId: credential.userId,
-            teamId: credential.teamId
+            teamId: credential.teamId,
           },
           results: {
             rawProductsCount: products.data.length,
             rawPricesCount: prices.data.length,
             formattedProductsCount: formattedProducts.length,
-            productsWithoutPrices: productsWithoutPrices.map(p => ({ id: p.id, name: p.name }))
-          }
-        }
+            productsWithoutPrices: productsWithoutPrices.map((p) => ({ id: p.id, name: p.name })),
+          },
+        },
       });
     }
 

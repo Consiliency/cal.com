@@ -2657,7 +2657,7 @@ __metadata:
     lodash: ^4.17.21
     qs-stringify: ^1.2.1
     react-i18next: ^12.2.0
-    stripe: ^9.16.0
+    stripe: ^18.3.0
   languageName: unknown
   linkType: soft
 
@@ -3792,9 +3792,9 @@ __metadata:
     "@calcom/lib": "*"
     "@calcom/prisma": "*"
     "@calcom/types": "*"
-    "@stripe/react-stripe-js": ^1.10.0
-    "@stripe/stripe-js": ^1.35.0
-    stripe: ^9.16.0
+    "@stripe/react-stripe-js": ^3.7.0
+    "@stripe/stripe-js": ^7.4.0
+    stripe: ^18.3.0
     ts-node: ^10.9.1
     uuid: ^8.3.2
     zod: ^3.22.4
@@ -4056,8 +4056,8 @@ __metadata:
     "@radix-ui/react-toggle-group": ^1.0.0
     "@radix-ui/react-tooltip": ^1.0.0
     "@sentry/nextjs": ^9.15.0
-    "@stripe/react-stripe-js": ^1.10.0
-    "@stripe/stripe-js": ^1.35.0
+    "@stripe/react-stripe-js": ^3.7.0
+    "@stripe/stripe-js": ^7.4.0
     "@tanstack/react-query": ^5.17.15
     "@testing-library/react": ^13.3.0
     "@tremor/react": ^2.11.0
@@ -4162,7 +4162,7 @@ __metadata:
     sharp: 0.33.5
     short-uuid: ^4.2.0
     sonner: ^1.7.4
-    stripe: ^9.16.0
+    stripe: ^18.3.0
     superjson: 1.9.1
     tailwindcss: ^3.3.3
     tailwindcss-animate: ^1.0.6
@@ -16521,23 +16521,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@stripe/react-stripe-js@npm:^1.10.0":
-  version: 1.10.0
-  resolution: "@stripe/react-stripe-js@npm:1.10.0"
+"@stripe/react-stripe-js@npm:^3.7.0":
+  version: 3.7.0
+  resolution: "@stripe/react-stripe-js@npm:3.7.0"
   dependencies:
     prop-types: ^15.7.2
   peerDependencies:
-    "@stripe/stripe-js": ^1.34.0
-    react: ^16.8.0 || ^17.0.0 || ^18.0.0
-    react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
-  checksum: 718085cedc5aae06366278d99850845e0be52678369a80e71c7b0f9e1a47ff60ee36a707e7143c723abdf4a945d2d3027d818da3cff929efabd64165b95d52b7
+    "@stripe/stripe-js": ">=1.44.1 <8.0.0"
+    react: ">=16.8.0 <20.0.0"
+    react-dom: ">=16.8.0 <20.0.0"
+  checksum: 6546460a4dee52a941ee6db8c2cdeed32609ecfd8f6520399427d020fec1c0653a10196230649c580f56c05cf1f4564470e9124e9f2cf5f9835de009e81bbcc6
   languageName: node
   linkType: hard
 
-"@stripe/stripe-js@npm:^1.35.0":
-  version: 1.35.0
-  resolution: "@stripe/stripe-js@npm:1.35.0"
-  checksum: 18322cbb372aefda4b8ae167ff67bf4a0f40d059753b67ff3f12ea0b5cc438ecaa16e0b0200941e1f8912456e9a356434d34f80e4b2d524df851f8482f02eda0
+"@stripe/stripe-js@npm:^7.4.0":
+  version: 7.4.0
+  resolution: "@stripe/stripe-js@npm:7.4.0"
+  checksum: 54bf6eff07666ef92d375816c2b5f90bee621886d02135140c8b976a06cbd1eb56f6b0ac7c61e7ee182c23233543d74346e8547079560c048418a5de4a6a9d78
   languageName: node
   linkType: hard
 
@@ -43734,13 +43734,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"stripe@npm:^9.16.0":
-  version: 9.16.0
-  resolution: "stripe@npm:9.16.0"
+"stripe@npm:^18.3.0":
+  version: 18.3.0
+  resolution: "stripe@npm:18.3.0"
   dependencies:
-    "@types/node": ">=8.1.0"
-    qs: ^6.10.3
-  checksum: d84eb9ef3fa0c50e1b62271bf822d3e9da22272ec7364ae8334db7277e42f657c42c10f6fa535c634c36081e17d1c8c5a1efc509b3747f84bfbe4cf2a94ade4b
+    qs: ^6.11.0
+  peerDependencies:
+    "@types/node": ">=12.x.x"
+  peerDependenciesMeta:
+    "@types/node":
+      optional: true
+  checksum: 5e05ebd28f0f9777a3c45f3a2204060721276d434be334c39bc88a4bb85bb47afa2e62a292e69b5dc448043f7c5f341fe3e4b025d425b46190074631142316a7
   languageName: node
   linkType: hard
 

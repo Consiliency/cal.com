@@ -45,7 +45,7 @@ export class PaymentService implements IAbstractPaymentService {
       this.credentials = null;
     }
     this.stripe = new Stripe(process.env.STRIPE_PRIVATE_KEY || "", {
-      apiVersion: "2020-08-27",
+      apiVersion: "2023-10-16",
     });
   }
 
@@ -107,7 +107,6 @@ export class PaymentService implements IAbstractPaymentService {
       const session = await this.stripe.checkout.sessions.create(
         {
           mode: "payment",
-          // @ts-expect-error - ui_mode is available in newer Stripe versions
           ui_mode: "embedded",
           customer: customer.id,
           line_items: [
