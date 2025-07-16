@@ -103,6 +103,19 @@ export class PaymentService implements IAbstractPaymentService {
         stripePriceId = metadata?.apps?.stripe?.stripePriceId;
       }
 
+      // Log session creation parameters
+      log.info("Creating Stripe checkout session", {
+        mode: "payment",
+        ui_mode: "embedded",
+        customerId: customer.id,
+        stripePriceId,
+        amount: payment.amount,
+        currency: payment.currency,
+        stripeAccount: this.credentials.stripe_user_id,
+        hasStripePriceId: !!stripePriceId,
+        eventTitle: eventTitle || bookingTitle || "Booking",
+      });
+
       // Create Embedded Checkout Session instead of Payment Intent
       const session = await this.stripe.checkout.sessions.create(
         {
@@ -179,7 +192,39 @@ export class PaymentService implements IAbstractPaymentService {
       }
       return paymentData;
     } catch (error) {
-      log.error("Stripe: Payment could not be created", bookingId, safeStringify(error));
+      // Enhanced error logging
+      const errorDetails = {
+        bookingId,
+        errorType: error instanceof Error ? error.constructor.name : typeof error,
+        errorMessage: error instanceof Error ? error.message : String(error),
+        errorCode: (error as any)?.code,
+        errorType_stripe: (error as any)?.type,
+        stripeRequestId: (error as any)?.requestId,
+        statusCode: (error as any)?.statusCode,
+        rawError: safeStringify(error),
+        credentials: {
+          hasStripeUserId: !!this.credentials?.stripe_user_id,
+          hasPublishableKey: !!this.credentials?.stripe_publishable_key,
+          currency: this.credentials?.default_currency,
+        },
+        sessionData: {
+          amount: payment.amount,
+          currency: payment.currency,
+          bookerEmail,
+          eventTitle,
+        },
+      };
+
+      log.error("Stripe: Payment creation failed with detailed error", errorDetails);
+
+      // Throw more specific error if it's a Stripe error
+      if ((error as any)?.code === "account_invalid") {
+        throw new Error("Stripe account configuration error");
+      }
+      if ((error as any)?.code === "parameter_invalid_empty") {
+        throw new Error("Missing required Stripe parameters");
+      }
+
       throw new Error("payment_not_created_error");
     }
   }
