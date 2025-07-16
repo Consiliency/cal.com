@@ -141,7 +141,7 @@ export class PaymentService implements IAbstractPaymentService {
           ],
           allow_promotion_codes: true,
           return_url: `${WEBAPP_URL}/api/booking/${bookingId}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
-          cancel_url: `${WEBAPP_URL}/api/booking/${bookingId}/payment-cancelled?session_id={CHECKOUT_SESSION_ID}`,
+          // cancel_url is not supported with ui_mode: "embedded"
           metadata: {
             identifier: "cal.com",
             bookingId: bookingId.toString(),
