@@ -2,6 +2,7 @@ require("dotenv").config({ path: "../../.env" });
 const englishTranslation = require("./public/static/locales/en/common.json");
 const { withAxiom } = require("next-axiom");
 const { version } = require("./package.json");
+// Force deployment after connection pool fixes
 const {
   i18n: { locales },
 } = require("./next-i18next.config");
