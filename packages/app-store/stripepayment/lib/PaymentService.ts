@@ -177,7 +177,7 @@ export class PaymentService implements IAbstractPaymentService {
           externalId: session.id,
           data: {
             sessionId: session.id,
-            clientSecret: (session as any).client_secret,
+            client_secret: (session as any).client_secret,
             stripe_publishable_key: this.credentials.stripe_publishable_key,
             stripeAccount: this.credentials.stripe_user_id,
           } as Prisma.InputJsonValue,
