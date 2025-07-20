@@ -19,6 +19,8 @@ export function getPaymentAppData(
     metadata: eventTypeMetaDataSchemaWithTypedApps.parse(_eventType.metadata),
   };
   const metadataApps = eventType.metadata?.apps;
+  console.log("[getPaymentAppData] Event type price:", eventType.price);
+  console.log("[getPaymentAppData] Metadata apps:", metadataApps);
   if (!metadataApps) {
     return { enabled: false, price: 0, currency: "usd", appId: null };
   }
@@ -42,8 +44,11 @@ export function getPaymentAppData(
     refundDaysCount?: number;
     refundCountCalendarDays?: boolean;
   } | null = null;
+  console.log("[getPaymentAppData] Payment app IDs found:", paymentAppIds);
+  
   for (const appId of paymentAppIds) {
     const appData = getEventTypeAppData(eventType, appId, forcedGet);
+    console.log(`[getPaymentAppData] App data for ${appId}:`, appData);
     if (appData && paymentAppData === null) {
       paymentAppData = {
         ...appData,
@@ -53,19 +58,20 @@ export function getPaymentAppData(
   }
   // This is the current expectation of system to have price and currency set always(using DB Level defaults).
   // Newly added apps code should assume that their app data might not be set.
-  return (
-    paymentAppData || {
-      enabled: false,
-      price: 0,
-      currency: "usd",
-      appId: null,
-      paymentOption: "ON_BOOKING",
-      credentialId: undefined,
-      refundPolicy: undefined,
-      refundDaysCount: undefined,
-      refundCountCalendarDays: undefined,
-    }
-  );
+  const result = paymentAppData || {
+    enabled: false,
+    price: 0,
+    currency: "usd",
+    appId: null,
+    paymentOption: "ON_BOOKING",
+    credentialId: undefined,
+    refundPolicy: undefined,
+    refundDaysCount: undefined,
+    refundCountCalendarDays: undefined,
+  };
+  
+  console.log("[getPaymentAppData] Final payment app data:", result);
+  return result;
 }
 
 export type PaymentAppData = ReturnType<typeof getPaymentAppData>;
