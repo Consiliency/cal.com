@@ -126,7 +126,7 @@ export const PaymentFormComponent = (
   );
 };
 
-export const PaymentForm = (props: Props) => {
+const PaymentFormInner = (props: Props) => {
   const router = useRouter();
   const searchParams = useCompatSearchParams();
   const [state, setState] = useState<States>({ status: "idle" });
@@ -208,21 +208,27 @@ export const PaymentForm = (props: Props) => {
   const { t } = useLocale();
 
   return (
+    <PaymentFormComponent
+      {...props}
+      paymentOption={paymentOption}
+      onSubmit={handleSubmit}
+      onCancel={onCancel}
+      onPaymentElementChange={() => setIsValid(true)}
+      elements={elements}
+      state={state}
+    />
+  );
+};
+
+export const PaymentForm = (props: Props) => {
+  return (
     <Elements
       options={{
         clientSecret: props.clientSecret,
         stripeAccount: props.payment.data.stripeAccount as string,
       }}
       stripe={getStripe(props.payment.data.stripe_publishable_key as string)}>
-      <PaymentFormComponent
-        {...props}
-        paymentOption={paymentOption}
-        onSubmit={handleSubmit}
-        onCancel={onCancel}
-        onPaymentElementChange={() => setIsValid(true)}
-        elements={elements}
-        state={state}
-      />
+      <PaymentFormInner {...props} />
     </Elements>
   );
 };
