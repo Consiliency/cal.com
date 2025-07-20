@@ -491,6 +491,8 @@ async function handler(
     ...eventType,
     metadata: eventTypeMetaDataSchemaWithTypedApps.parse(eventType.metadata),
   });
+  
+  loggerWithEventDetails.debug("Payment app data:", paymentAppData);
 
   const { userReschedulingIsOwner, isConfirmedByDefault } = await getRequiresConfirmationFlags({
     eventType,
@@ -1898,6 +1900,15 @@ async function handler(
     paymentAppData.price > 0 &&
     !originalRescheduledBooking?.paid &&
     !!booking;
+    
+  loggerWithEventDetails.debug("Payment check:", {
+    price: paymentAppData.price,
+    isNaN: Number.isNaN(paymentAppData.price),
+    priceGreaterThanZero: paymentAppData.price > 0,
+    originalBookingPaid: originalRescheduledBooking?.paid,
+    hasBooking: !!booking,
+    bookingRequiresPayment
+  });
 
   if (!isConfirmedByDefault && noEmail !== true && !bookingRequiresPayment) {
     loggerWithEventDetails.debug(
@@ -2034,7 +2045,7 @@ async function handler(
       seatReferenceUid: evt.attendeeSeatId,
     };
 
-    return {
+    const finalResponse = {
       ...bookingResponse,
       ...luckyUserResponse,
       message: "Payment required",
@@ -2044,6 +2055,15 @@ async function handler(
       isDryRun,
       ...(isDryRun ? { troubleshooterData } : {}),
     };
+    
+    loggerWithEventDetails.debug("Returning payment response:", {
+      paymentUid: payment?.uid,
+      paymentId: payment?.id,
+      paymentRequired: true,
+      bookingUid: booking?.uid
+    });
+    
+    return finalResponse;
   }
 
   loggerWithEventDetails.debug(`Booking ${organizerUser.username} completed`);
