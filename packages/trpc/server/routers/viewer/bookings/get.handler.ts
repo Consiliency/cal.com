@@ -45,7 +45,7 @@ export const getHandler = async ({ ctx, input }: GetOptions) => {
 
   const { bookings, recurringInfo, totalCount } = await getAllUserBookings({
     ctx: {
-      user: { id: user.id, email: user.email, orgId: user?.profile?.organizationId },
+      user: { id: user.id, email: user.email, orgId: user?.profile?.organizationId ?? null },
       prisma: prisma,
       kysely: kysely,
     },
