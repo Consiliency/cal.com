@@ -19,15 +19,5 @@ export function getClientSecretFromPayment(
     clientSecret = payment.data.client_secret;
   }
 
-  // Decode client secret if it contains URL-encoded characters
-  if (clientSecret && clientSecret.includes("%")) {
-    try {
-      return decodeURIComponent(clientSecret);
-    } catch (e) {
-      // If decoding fails, return as-is
-      return clientSecret;
-    }
-  }
-
   return clientSecret;
 }

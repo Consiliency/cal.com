@@ -66,14 +66,6 @@ const handlePayment = async ({
 
   const apps = eventTypeAppMetadataOptionalSchema.parse(selectedEventType?.metadata?.apps);
   const paymentOption = apps?.[paymentAppCredentials.appId].paymentOption || "ON_BOOKING";
-  
-  console.log("[handlePayment] Payment details:", {
-    appId: paymentAppCredentials.appId,
-    appData: apps?.[paymentAppCredentials.appId],
-    paymentOption,
-    price: apps?.[paymentAppCredentials.appId]?.price,
-    currency: apps?.[paymentAppCredentials.appId]?.currency,
-  });
 
   let paymentData;
   if (paymentOption === "HOLD") {
@@ -105,13 +97,6 @@ const handlePayment = async ({
     );
   }
 
-  console.log("[handlePayment] Payment data created:", {
-    uid: paymentData?.uid,
-    id: paymentData?.id,
-    amount: paymentData?.amount,
-    success: paymentData?.success,
-  });
-  
   if (!paymentData) {
     console.error("Payment data is null");
     throw new Error("Payment data is null");

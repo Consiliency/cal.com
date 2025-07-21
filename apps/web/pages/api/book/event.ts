@@ -36,15 +36,7 @@ async function handler(req: NextApiRequest & { userId?: number }) {
     hostname: req.headers.host || "",
     forcedSlug: req.headers["x-cal-force-slug"] as string | undefined,
   });
-  
-  // Debug logging to understand the response
-  console.log("Booking response:", {
-    uid: booking.uid,
-    paymentRequired: booking.paymentRequired,
-    paymentUid: booking.paymentUid,
-    message: booking.message,
-  });
-  
+
   return booking;
 }
 

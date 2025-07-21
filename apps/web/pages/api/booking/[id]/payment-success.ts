@@ -3,6 +3,7 @@ import Stripe from "stripe";
 
 import { WEBAPP_URL } from "@calcom/lib/constants";
 import logger from "@calcom/lib/logger";
+import { handlePaymentSuccess } from "@calcom/lib/payment/handlePaymentSuccess";
 import prisma from "@calcom/prisma";
 
 const log = logger.getSubLogger({ prefix: ["payment-success-webhook"] });
@@ -36,16 +37,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(404).json({ error: "Payment not found" });
       }
 
-      await prisma.payment.update({
-        where: {
-          id: payment.id,
-        },
-        data: {
-          success: true,
-        },
-      });
+      // Handle payment success which updates payment record and handles booking confirmation
+      await handlePaymentSuccess(payment.id, payment.bookingId);
 
-      // Get booking details for confirmation
+      // Get booking details for redirect
       const booking = await prisma.booking.findUnique({
         where: {
           id: parseInt(id as string),

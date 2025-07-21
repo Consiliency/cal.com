@@ -2,7 +2,6 @@ require("dotenv").config({ path: "../../.env" });
 const englishTranslation = require("./public/static/locales/en/common.json");
 const { withAxiom } = require("next-axiom");
 const { version } = require("./package.json");
-// Force deployment - Fix URL encoding in client_secret (2025-01-20 23:00 UTC)
 const {
   i18n: { locales },
 } = require("./next-i18next.config");

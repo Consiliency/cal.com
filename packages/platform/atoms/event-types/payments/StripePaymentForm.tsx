@@ -1,13 +1,11 @@
-import { Elements, useElements, useStripe } from "@stripe/react-stripe-js";
+import { EmbeddedCheckout, EmbeddedCheckoutProvider } from "@stripe/react-stripe-js";
 import { useEffect, useState } from "react";
-import type { SyntheticEvent } from "react";
 
 import getStripe from "@calcom/app-store/stripepayment/lib/client";
-import type { Props, States } from "@calcom/features/ee/payments/components/Payment";
-import { PaymentFormComponent } from "@calcom/features/ee/payments/components/Payment";
+import type { Props } from "@calcom/features/ee/payments/components/Payment";
 import type { PaymentPageProps } from "@calcom/features/ee/payments/pages/payment";
-import { WEBAPP_URL } from "@calcom/lib/constants";
 import { useLocale } from "@calcom/lib/hooks/useLocale";
+import { CheckboxField } from "@calcom/ui/components/form";
 
 const StripePaymentComponent = (
   props: Props & {
@@ -16,90 +14,36 @@ const StripePaymentComponent = (
   }
 ) => {
   const { t } = useLocale();
-  const elements = useElements();
   const paymentOption = props.payment.paymentOption;
-  const attendeeEmail = props.booking.attendees[0].email;
-  const stripe = useStripe();
+  const [holdAcknowledged, setHoldAcknowledged] = useState<boolean>(paymentOption === "HOLD" ? false : true);
 
-  const [state, setState] = useState<States>({ status: "idle" });
+  // Set up callback handling for embedded checkout
+  useEffect(() => {
+    // Embedded checkout handles its own success/error states
+    // The success callback will be triggered by the redirect URL
+    // which is handled by the payment-success API endpoint
+  }, []);
 
-  return (
-    <PaymentFormComponent
-      {...props}
-      elements={elements}
-      paymentOption={paymentOption}
-      state={state}
-      onSubmit={async (ev: SyntheticEvent) => {
-        ev.preventDefault();
+  // If HOLD payment and not acknowledged, show acknowledgment form
+  if (paymentOption === "HOLD" && !holdAcknowledged) {
+    return (
+      <div className="bg-subtle mt-4 rounded-md p-6">
+        <div className="bg-info mb-5 rounded-md p-3">
+          <CheckboxField
+            description={t("acknowledge_booking_no_show_fee", {
+              amount: props.payment.amount / 100,
+              formatParams: { amount: { currency: props.payment.currency } },
+            })}
+            onChange={(e) => setHoldAcknowledged(e.target.checked)}
+            descriptionClassName="text-info font-semibold"
+          />
+        </div>
+      </div>
+    );
+  }
 
-        if (!stripe || !elements) {
-          return;
-        }
-
-        setState({ status: "processing" });
-
-        let payload;
-        const params: {
-          uid: string;
-          email: string | null;
-          location?: string;
-          payment_intent?: string;
-          payment_intent_client_secret?: string;
-          redirect_status?: string;
-        } = {
-          uid: props.booking.uid,
-          email: attendeeEmail,
-        };
-        if (paymentOption === "HOLD" && "setupIntent" in props.payment.data) {
-          payload = await stripe.confirmSetup({
-            elements,
-            redirect: "if_required",
-          });
-          if (payload.setupIntent) {
-            params.payment_intent = payload.setupIntent.id;
-            params.payment_intent_client_secret = payload.setupIntent.client_secret || undefined;
-            params.redirect_status = payload.setupIntent.status;
-          }
-        } else if (paymentOption === "ON_BOOKING") {
-          payload = await stripe.confirmPayment({
-            elements,
-            redirect: "if_required",
-            confirmParams: {
-              return_url: `${WEBAPP_URL}/booking/${params.uid}`,
-            },
-          });
-          if (payload.paymentIntent) {
-            params.payment_intent = payload.paymentIntent.id;
-            params.payment_intent_client_secret = payload.paymentIntent.client_secret || undefined;
-            params.redirect_status = payload.paymentIntent.status;
-          }
-        }
-
-        if (payload?.error) {
-          setState({
-            status: "error",
-            error: new Error(`Payment failed: ${payload.error.message}`),
-          });
-        } else {
-          setState({ status: "idle" });
-          props.onPaymentSuccess?.(props as unknown as PaymentPageProps);
-          if (props.location) {
-            if (props.location.includes("integration")) {
-              params.location = t("web_conferencing_details_to_follow");
-            } else {
-              params.location = props.location;
-            }
-          }
-        }
-      }}
-      onCancel={() => {
-        props.onPaymentCancellation?.(props as unknown as PaymentPageProps);
-      }}
-      onPaymentElementChange={() => {
-        setState({ status: "idle" });
-      }}
-    />
-  );
+  // Once acknowledged (or if not HOLD), show embedded checkout
+  return <EmbeddedCheckout />;
 };
 
 const StripePaymentForm = (
@@ -109,7 +53,7 @@ const StripePaymentForm = (
     onPaymentCancellation?: (input: PaymentPageProps) => void;
   }
 ) => {
-  const stripePromise = getStripe(props.payment.data.stripe_publishable_key as any);
+  const { i18n } = useLocale();
   const [theme, setTheme] = useState<"stripe" | "night">("stripe");
 
   useEffect(() => {
@@ -118,17 +62,27 @@ const StripePaymentForm = (
     }
   }, []);
 
+  // Configure options for embedded checkout
+  const options = {
+    clientSecret: props.clientSecret,
+    appearance: {
+      theme,
+    },
+    locale: i18n.language as any,
+  };
+
+  // Handle connected accounts
+  const stripe = props.payment.data.stripeAccount
+    ? getStripe(
+        props.payment.data.stripe_publishable_key as string,
+        props.payment.data.stripeAccount as string
+      )
+    : getStripe(props.payment.data.stripe_publishable_key as string);
+
   return (
-    <Elements
-      stripe={stripePromise}
-      options={{
-        clientSecret: props.clientSecret,
-        appearance: {
-          theme,
-        },
-      }}>
+    <EmbeddedCheckoutProvider stripe={stripe} options={options}>
       <StripePaymentComponent {...props} />
-    </Elements>
+    </EmbeddedCheckoutProvider>
   );
 };
 
