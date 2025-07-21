@@ -1,10 +1,11 @@
-import { EmbeddedCheckout, EmbeddedCheckoutProvider } from "@stripe/react-stripe-js";
-import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 import getStripe from "@calcom/app-store/stripepayment/lib/client";
 import type { Props } from "@calcom/features/ee/payments/components/Payment";
 import type { PaymentPageProps } from "@calcom/features/ee/payments/pages/payment";
 import { useLocale } from "@calcom/lib/hooks/useLocale";
+import { Button } from "@calcom/ui/components/button";
 import { CheckboxField } from "@calcom/ui/components/form";
 
 const StripePaymentComponent = (
@@ -14,20 +15,40 @@ const StripePaymentComponent = (
   }
 ) => {
   const { t } = useLocale();
+  const router = useRouter();
   const paymentOption = props.payment.paymentOption;
   const [holdAcknowledged, setHoldAcknowledged] = useState<boolean>(paymentOption === "HOLD" ? false : true);
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
-  // Set up callback handling for embedded checkout
-  useEffect(() => {
-    // Embedded checkout handles its own success/error states
-    // The success callback will be triggered by the redirect URL
-    // which is handled by the payment-success API endpoint
-  }, []);
+  const handleCheckoutRedirect = async () => {
+    if (!props.clientSecret) return;
 
-  // If HOLD payment and not acknowledged, show acknowledgment form
-  if (paymentOption === "HOLD" && !holdAcknowledged) {
-    return (
-      <div className="bg-subtle mt-4 rounded-md p-6">
+    setIsRedirecting(true);
+    const stripe = await getStripe(
+      props.payment.data.stripe_publishable_key as string,
+      props.payment.data.stripeAccount as string
+    );
+
+    if (!stripe) {
+      console.error("Stripe failed to load");
+      setIsRedirecting(false);
+      return;
+    }
+
+    // Redirect to Stripe Checkout
+    const { error } = await stripe.redirectToCheckout({
+      sessionId: props.payment.data.sessionId as string,
+    });
+
+    if (error) {
+      console.error("Stripe redirect error:", error);
+      setIsRedirecting(false);
+    }
+  };
+
+  return (
+    <div className="bg-subtle mt-4 rounded-md p-6">
+      {paymentOption === "HOLD" && (
         <div className="bg-info mb-5 rounded-md p-3">
           <CheckboxField
             description={t("acknowledge_booking_no_show_fee", {
@@ -38,12 +59,28 @@ const StripePaymentComponent = (
             descriptionClassName="text-info font-semibold"
           />
         </div>
+      )}
+      <div className="mt-4 flex justify-end space-x-2">
+        <Button
+          color="minimal"
+          onClick={() => props.onPaymentCancellation?.(props as unknown as PaymentPageProps)}
+          disabled={isRedirecting}>
+          {t("cancel")}
+        </Button>
+        <Button
+          onClick={handleCheckoutRedirect}
+          disabled={!holdAcknowledged || isRedirecting}
+          loading={isRedirecting}>
+          {paymentOption === "HOLD"
+            ? t("submit_card_info")
+            : t("pay_now", {
+                amount: props.payment.amount / 100,
+                formatParams: { amount: { currency: props.payment.currency } },
+              })}
+        </Button>
       </div>
-    );
-  }
-
-  // Once acknowledged (or if not HOLD), show embedded checkout
-  return <EmbeddedCheckout />;
+    </div>
+  );
 };
 
 const StripePaymentForm = (
@@ -53,37 +90,8 @@ const StripePaymentForm = (
     onPaymentCancellation?: (input: PaymentPageProps) => void;
   }
 ) => {
-  const { i18n } = useLocale();
-  const [theme, setTheme] = useState<"stripe" | "night">("stripe");
-
-  useEffect(() => {
-    if (document.documentElement.classList.contains("dark")) {
-      setTheme("night");
-    }
-  }, []);
-
-  // Configure options for embedded checkout
-  const options = {
-    clientSecret: props.clientSecret,
-    appearance: {
-      theme,
-    },
-    locale: i18n.language as any,
-  };
-
-  // Handle connected accounts
-  const stripe = props.payment.data.stripeAccount
-    ? getStripe(
-        props.payment.data.stripe_publishable_key as string,
-        props.payment.data.stripeAccount as string
-      )
-    : getStripe(props.payment.data.stripe_publishable_key as string);
-
-  return (
-    <EmbeddedCheckoutProvider stripe={stripe} options={options}>
-      <StripePaymentComponent {...props} />
-    </EmbeddedCheckoutProvider>
-  );
+  // Use the redirect component directly
+  return <StripePaymentComponent {...props} />;
 };
 
 export default StripePaymentForm;
