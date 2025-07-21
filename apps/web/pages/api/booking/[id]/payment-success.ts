@@ -93,7 +93,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       // Handle payment success which updates payment record and handles booking confirmation
-      await handlePaymentSuccess(payment.id, payment.bookingId);
+      try {
+        await handlePaymentSuccess(payment.id, payment.bookingId);
+      } catch (error) {
+        // Check if this is actually a success (HttpCode with 200 status)
+        if (error && typeof error === "object" && "statusCode" in error && error.statusCode === 200) {
+          log.info("Payment handled successfully", { message: (error as any).message });
+          // This is actually a success, continue with redirect
+        } else {
+          // This is a real error, re-throw it
+          throw error;
+        }
+      }
 
       // Get booking details for redirect
       const booking = await prisma.booking.findUnique({
