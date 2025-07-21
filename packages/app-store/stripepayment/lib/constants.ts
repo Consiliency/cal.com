@@ -11,4 +11,8 @@ export const paymentOptions = [
     label: "hold_option",
     value: "HOLD",
   },
+  {
+    label: "sync_booking_option",
+    value: "SYNC_BOOKING",
+  },
 ];

@@ -963,6 +963,7 @@ model Payment {
 enum PaymentOption {
   ON_BOOKING
   HOLD
+  SYNC_BOOKING
 }
 
 enum WebhookTriggerEvents {

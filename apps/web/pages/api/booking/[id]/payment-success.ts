@@ -68,6 +68,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           externalId: session_id as string,
           bookingId: parseInt(id as string),
         },
+        select: {
+          id: true,
+          bookingId: true,
+          externalId: true,
+          paymentOption: true,
+        },
       });
 
       if (!payment) {
@@ -128,6 +134,79 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       // Redirect to booking success page
       return res.redirect(`${WEBAPP_URL}/booking/${booking.uid}?payment_status=success`);
+    } else if (session.status === "open") {
+      // Payment failed or was cancelled
+      const payment = await prisma.payment.findFirst({
+        where: {
+          externalId: session_id as string,
+          bookingId: parseInt(id as string),
+        },
+        select: {
+          id: true,
+          uid: true,
+          paymentOption: true,
+        },
+      });
+
+      if (payment?.paymentOption === "SYNC_BOOKING") {
+        // For SYNC_BOOKING, delete the booking to free up the time slot
+        const booking = await prisma.booking.findUnique({
+          where: {
+            id: parseInt(id as string),
+          },
+          select: {
+            eventTypeId: true,
+            eventType: {
+              select: {
+                slug: true,
+                team: {
+                  select: {
+                    slug: true,
+                  },
+                },
+                owner: {
+                  select: {
+                    username: true,
+                  },
+                },
+              },
+            },
+          },
+        });
+
+        // Delete the booking
+        await prisma.booking.delete({
+          where: {
+            id: parseInt(id as string),
+          },
+        });
+
+        log.info("Deleted unpaid SYNC_BOOKING", {
+          bookingId: id,
+          sessionId: session_id,
+        });
+
+        // Construct the event type URL to redirect back to
+        if (booking?.eventType) {
+          const { eventType } = booking;
+          let eventUrl = "";
+
+          if (eventType.team?.slug) {
+            eventUrl = `${WEBAPP_URL}/team/${eventType.team.slug}/${eventType.slug}`;
+          } else if (eventType.owner?.username) {
+            eventUrl = `${WEBAPP_URL}/${eventType.owner.username}/${eventType.slug}`;
+          }
+
+          return res.redirect(`${eventUrl}?error=payment_failed`);
+        }
+      }
+
+      // For other payment options, redirect to payment page to retry
+      if (payment) {
+        return res.redirect(`${WEBAPP_URL}/payment/${payment.uid}`);
+      }
+
+      return res.redirect(`${WEBAPP_URL}/payment-failed`);
     } else {
       // Payment not successful, redirect to payment failed page
       const booking = await prisma.booking.findUnique({

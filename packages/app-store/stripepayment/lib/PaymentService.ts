@@ -443,23 +443,28 @@ export class PaymentService implements IAbstractPaymentService {
     paymentData: Payment,
     eventTypeMetadata?: EventTypeMetadata
   ): Promise<void> {
-    await sendAwaitingPaymentEmailAndSMS(
-      {
-        ...event,
-        paymentInfo: {
-          link: createPaymentLink({
-            paymentUid: paymentData.uid,
-            name: booking.user?.name,
-            email: booking.user?.email,
-            date: booking.startTime.toISOString(),
-          }),
-          paymentOption: paymentData.paymentOption || "ON_BOOKING",
-          amount: paymentData.amount,
-          currency: paymentData.currency,
+    // Only send payment link email for ON_BOOKING option
+    // SYNC_BOOKING payments are handled synchronously, no email needed
+    // HOLD payments don't need immediate payment emails
+    if (paymentData.paymentOption === "ON_BOOKING") {
+      await sendAwaitingPaymentEmailAndSMS(
+        {
+          ...event,
+          paymentInfo: {
+            link: createPaymentLink({
+              paymentUid: paymentData.uid,
+              name: booking.user?.name,
+              email: booking.user?.email,
+              date: booking.startTime.toISOString(),
+            }),
+            paymentOption: paymentData.paymentOption || "ON_BOOKING",
+            amount: paymentData.amount,
+            currency: paymentData.currency,
+          },
         },
-      },
-      eventTypeMetadata
-    );
+        eventTypeMetadata
+      );
+    }
   }
 
   async deletePayment(paymentId: Payment["id"]): Promise<boolean> {
