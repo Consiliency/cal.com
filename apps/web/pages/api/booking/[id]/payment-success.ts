@@ -9,7 +9,7 @@ import prisma from "@calcom/prisma";
 const log = logger.getSubLogger({ prefix: ["payment-success-webhook"] });
 
 const stripe = new Stripe(process.env.STRIPE_PRIVATE_KEY || "", {
-  apiVersion: "2023-10-16",
+  apiVersion: "2020-08-27" as const,
 });
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {

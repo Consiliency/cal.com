@@ -8,7 +8,7 @@ declare global {
 const stripe =
   globalThis.stripe ||
   new Stripe(process.env.STRIPE_PRIVATE_KEY!, {
-    apiVersion: "2023-10-16",
+    apiVersion: "2020-08-27" as const,
   });
 
 if (process.env.NODE_ENV !== "production") {

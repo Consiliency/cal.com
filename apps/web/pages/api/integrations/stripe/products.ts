@@ -58,7 +58,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Initialize Stripe with the platform's key
     const stripe = new Stripe(process.env.STRIPE_PRIVATE_KEY || "", {
-      apiVersion: "2023-10-16",
+      apiVersion: "2020-08-27" as const,
     });
 
     // Get platform account info
