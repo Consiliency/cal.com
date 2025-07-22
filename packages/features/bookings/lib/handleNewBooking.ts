@@ -405,8 +405,8 @@ async function handler(
   const isPlatformBooking = !!platformClientId;
 
   const eventType = await getEventType({
-    eventTypeId: rawBookingData.eventTypeId,
-    eventTypeSlug: rawBookingData.eventTypeSlug,
+    eventTypeId: rawBookingData.eventTypeId as number | undefined,
+    eventTypeSlug: rawBookingData.eventTypeSlug as string | undefined,
   });
 
   const bookingDataSchema = bookingDataSchemaGetter({
@@ -562,7 +562,7 @@ async function handler(
       paymentAppData: {
         enabled: paymentAppData.enabled,
         price: paymentAppData.price,
-        paymentOption: paymentAppData.paymentOption,
+        paymentOption: "paymentOption" in paymentAppData ? paymentAppData.paymentOption : "ON_BOOKING",
         currency: paymentAppData.currency,
         appId: paymentAppData.appId,
       },
@@ -1958,7 +1958,9 @@ async function handler(
     // Load credentials.app.categories
     const credentialPaymentAppCategories = await prisma.credential.findMany({
       where: {
-        ...(paymentAppData.credentialId ? { id: paymentAppData.credentialId } : { userId: organizerUser.id }),
+        ...("credentialId" in paymentAppData && paymentAppData.credentialId
+          ? { id: paymentAppData.credentialId }
+          : { userId: organizerUser.id }),
         app: {
           categories: {
             hasSome: ["payment"],
@@ -2011,7 +2013,7 @@ async function handler(
       throw new HttpError({
         statusCode: 400,
         message: "Payment processing failed",
-        cause: error,
+        cause: error as Error,
       });
     }
     const subscriberOptionsPaymentInitiated: GetSubscriberOptions = {

@@ -2,7 +2,8 @@ import type { z } from "zod";
 
 import { getEventTypeAppData } from "@calcom/app-store/_utils/getEventTypeAppData";
 import type { appDataSchemas } from "@calcom/app-store/apps.schemas.generated";
-import type { appDataSchema, paymentOptionEnum } from "@calcom/app-store/stripepayment/zod";
+import type { appDataSchema } from "@calcom/app-store/stripepayment/zod";
+import type { paymentOptionEnum } from "@calcom/app-store/stripepayment/zod";
 import type { EventTypeAppsList } from "@calcom/app-store/utils";
 import type { BookerEvent } from "@calcom/features/bookings/types";
 import type { EventTypeMetaDataSchema } from "@calcom/prisma/zod-utils";
@@ -20,7 +21,17 @@ export function getPaymentAppData(
   };
   const metadataApps = eventType.metadata?.apps;
   if (!metadataApps) {
-    return { enabled: false, price: 0, currency: "usd", appId: null };
+    return {
+      enabled: false,
+      price: 0,
+      currency: "usd",
+      appId: null,
+      paymentOption: "ON_BOOKING" as const,
+      credentialId: undefined,
+      refundPolicy: undefined,
+      refundDaysCount: undefined,
+      refundCountCalendarDays: undefined,
+    };
   }
   type appId = keyof typeof metadataApps;
   // @TODO: a lot of unknowns types here can be improved later
@@ -36,7 +47,7 @@ export function getPaymentAppData(
     price: number;
     currency: string;
     appId: EventTypeAppsList | null;
-    paymentOption: typeof paymentOptionEnum;
+    paymentOption: z.infer<typeof paymentOptionEnum>;
     credentialId?: number;
     refundPolicy?: string;
     refundDaysCount?: number;
