@@ -378,7 +378,7 @@ export type PlatformParams = {
 };
 
 export type BookingHandlerInput = {
-  bookingData: Record<string, any>;
+  bookingData: Record<string, unknown>;
   userId?: number;
   // These used to come from headers but now we're passing them as params
   hostname?: string;
@@ -491,7 +491,7 @@ async function handler(
     ...eventType,
     metadata: eventTypeMetaDataSchemaWithTypedApps.parse(eventType.metadata),
   });
-  
+
   loggerWithEventDetails.debug("Payment app data:", paymentAppData);
 
   const { userReschedulingIsOwner, isConfirmedByDefault } = await getRequiresConfirmationFlags({
@@ -1900,14 +1900,14 @@ async function handler(
     paymentAppData.price > 0 &&
     !originalRescheduledBooking?.paid &&
     !!booking;
-    
+
   loggerWithEventDetails.debug("Payment check:", {
     price: paymentAppData.price,
     isNaN: Number.isNaN(paymentAppData.price),
     priceGreaterThanZero: paymentAppData.price > 0,
     originalBookingPaid: originalRescheduledBooking?.paid,
     hasBooking: !!booking,
-    bookingRequiresPayment
+    bookingRequiresPayment,
   });
 
   if (!isConfirmedByDefault && noEmail !== true && !bookingRequiresPayment) {
@@ -2052,17 +2052,27 @@ async function handler(
       paymentRequired: true,
       paymentUid: payment?.uid,
       paymentId: payment?.id,
+      // Include payment data for SYNC_BOOKING to enable embedded checkout
+      ...(payment?.paymentOption === "SYNC_BOOKING" && payment?.data && typeof payment.data === "object"
+        ? {
+            clientSecret: (payment.data as { client_secret?: string }).client_secret,
+            stripePublishableKey: (payment.data as { stripe_publishable_key?: string })
+              .stripe_publishable_key,
+            sessionId: (payment.data as { sessionId?: string }).sessionId,
+          }
+        : {}),
       isDryRun,
       ...(isDryRun ? { troubleshooterData } : {}),
     };
-    
+
     loggerWithEventDetails.debug("Returning payment response:", {
       paymentUid: payment?.uid,
       paymentId: payment?.id,
       paymentRequired: true,
-      bookingUid: booking?.uid
+      bookingUid: booking?.uid,
+      hasSyncBookingData: payment?.paymentOption === "SYNC_BOOKING",
     });
-    
+
     return finalResponse;
   }
 

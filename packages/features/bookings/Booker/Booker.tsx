@@ -29,6 +29,7 @@ import { DryRunMessage } from "./components/DryRunMessage";
 import { EventMeta } from "./components/EventMeta";
 import { HavingTroubleFindingTime } from "./components/HavingTroubleFindingTime";
 import { Header } from "./components/Header";
+import { InlinePayment } from "./components/InlinePayment";
 import { InstantBooking } from "./components/InstantBooking";
 import { LargeCalendar } from "./components/LargeCalendar";
 import { OverlayCalendar } from "./components/OverlayCalendar/OverlayCalendar";
@@ -571,6 +572,8 @@ const BookerComponent = ({
         {EventBooker}
       </BookFormAsModal>
       <Toaster position="bottom-right" />
+      {/* Render inline payment component for SYNC_BOOKING */}
+      {bookings?.inlinePaymentProps && <InlinePayment {...bookings.inlinePaymentProps} />}
     </>
   );
 };

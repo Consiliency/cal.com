@@ -125,6 +125,14 @@ export const useBookings = ({ event, hashedLink, bookingForm, metadata, teamMemb
   const [instantVideoMeetingUrl, setInstantVideoMeetingUrl] = useState<string | undefined>();
   const duration = useBookerStore((state) => state.selectedDuration);
 
+  // State for inline payment
+  const [inlinePaymentData, setInlinePaymentData] = useState<{
+    clientSecret: string;
+    stripePublishableKey: string;
+    booking: any;
+  } | null>(null);
+  const [showInlinePayment, setShowInlinePayment] = useState(false);
+
   const isRescheduling = !!rescheduleUid && !!bookingData;
 
   const bookingId = parseInt(getQueryParam("bookingId") ?? "0");
@@ -247,15 +255,27 @@ export const useBookings = ({ event, hashedLink, bookingForm, metadata, teamMemb
       }
 
       if (paymentUid) {
-        router.push(
-          createPaymentLink({
-            paymentUid,
-            date: timeslot,
-            name: fullName,
-            email: bookingForm.getValues("responses.email"),
-            absolute: false,
-          })
-        );
+        // Check if this is a SYNC_BOOKING with embedded checkout data
+        if ((booking as any).clientSecret && (booking as any).stripePublishableKey) {
+          // Show inline payment for SYNC_BOOKING
+          setInlinePaymentData({
+            clientSecret: (booking as any).clientSecret,
+            stripePublishableKey: (booking as any).stripePublishableKey,
+            booking: booking,
+          });
+          setShowInlinePayment(true);
+        } else {
+          // Fall back to traditional payment page redirect for other payment options
+          router.push(
+            createPaymentLink({
+              paymentUid,
+              date: timeslot,
+              name: fullName,
+              email: bookingForm.getValues("responses.email"),
+              absolute: false,
+            })
+          );
+        }
         return;
       }
 
@@ -421,6 +441,53 @@ export const useBookings = ({ event, hashedLink, bookingForm, metadata, teamMemb
     creatingInstantBooking: createInstantBookingMutation.isPending,
   };
 
+  // Handlers for inline payment
+  const handleInlinePaymentSuccess = () => {
+    if (inlinePaymentData?.booking) {
+      const { uid } = inlinePaymentData.booking;
+      const query = {
+        isSuccessBookingPage: true,
+        email: bookingForm.getValues("responses.email"),
+        eventTypeSlug: eventSlug,
+        seatReferenceUid:
+          "seatReferenceUid" in inlinePaymentData.booking
+            ? (inlinePaymentData.booking.seatReferenceUid as string)
+            : null,
+        formerTime:
+          isRescheduling && bookingData?.startTime ? dayjs(bookingData.startTime).toString() : undefined,
+        rescheduledBy,
+      };
+
+      bookingSuccessRedirect({
+        successRedirectUrl: event?.data?.successRedirectUrl || "",
+        query,
+        booking: inlinePaymentData.booking,
+        forwardParamsSuccessRedirect:
+          event?.data?.forwardParamsSuccessRedirect === undefined
+            ? true
+            : event?.data?.forwardParamsSuccessRedirect,
+      });
+    }
+  };
+
+  const handleInlinePaymentCancel = () => {
+    setShowInlinePayment(false);
+    setInlinePaymentData(null);
+    // Show error toast
+    showToast(t("payment_cancelled"), "error");
+  };
+
+  const inlinePaymentProps =
+    showInlinePayment && inlinePaymentData
+      ? {
+          clientSecret: inlinePaymentData.clientSecret,
+          stripePublishableKey: inlinePaymentData.stripePublishableKey,
+          onSuccess: handleInlinePaymentSuccess,
+          onCancel: handleInlinePaymentCancel,
+          isOpen: showInlinePayment,
+        }
+      : null;
+
   return {
     handleBookEvent,
     expiryTime: instantMeetingTokenExpiryTime,
@@ -429,5 +496,11 @@ export const useBookings = ({ event, hashedLink, bookingForm, metadata, teamMemb
     errors,
     loadingStates,
     instantVideoMeetingUrl,
+    // Inline payment props
+    showInlinePayment,
+    inlinePaymentData,
+    handleInlinePaymentSuccess,
+    handleInlinePaymentCancel,
+    inlinePaymentProps,
   };
 };
