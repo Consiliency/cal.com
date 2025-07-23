@@ -8,7 +8,7 @@ import { Select } from "@calcom/ui/components/form";
 import { TextField } from "@calcom/ui/components/form";
 import { SatSymbol } from "@calcom/ui/components/icon";
 
-import { PaypalPaymentOptions as paymentOptions } from "../zod";
+import { AlbyPaymentOptions as paymentOptions } from "../zod";
 
 type Option = { value: string; label: string };
 
