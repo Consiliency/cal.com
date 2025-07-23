@@ -74,7 +74,6 @@ export const generateTeamCheckoutSession = async ({
           ],
         }
       : { allow_promotion_codes: true }),
-    // @ts-expect-error - return_url replaces success_url/cancel_url in embedded mode
     return_url: `${WEBAPP_URL}/api/teams/create?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${WEBAPP_URL}/settings/my-account/profile`,
     success_url: `${WEBAPP_URL}/api/teams/create?session_id={CHECKOUT_SESSION_ID}`,
