@@ -405,7 +405,7 @@ async function handler(
   const isPlatformBooking = !!platformClientId;
 
   const eventType = await getEventType({
-    eventTypeId: (rawBookingData.eventTypeId || 0) as number,
+    eventTypeId: Number(rawBookingData.eventTypeId) || 0,
     eventTypeSlug: rawBookingData.eventTypeSlug as string | undefined,
   });
 

@@ -120,7 +120,6 @@ export class PaymentService implements IAbstractPaymentService {
       const session = await this.stripe.checkout.sessions.create(
         {
           mode: "payment",
-          // @ts-expect-error - ui_mode exists at runtime but not in the type definitions yet
           ui_mode: "embedded",
           customer: customer.id,
           line_items: [
