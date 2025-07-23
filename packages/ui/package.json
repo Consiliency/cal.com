@@ -5,6 +5,11 @@
   "version": "0.0.0",
   "main": "./index.ts",
   "exports": {
+    ".": {
+      "types": "./index.ts",
+      "import": "./index.ts",
+      "require": "./index.ts"
+    },
     "./classNames": "./classNames.ts",
     "./styles": "./styles/index.ts",
     "./components/address": "./components/address/index.ts",
