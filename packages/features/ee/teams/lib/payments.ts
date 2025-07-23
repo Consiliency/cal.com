@@ -177,7 +177,6 @@ export const purchaseTeamOrOrgSubscription = async (input: {
   const session = await stripe.checkout.sessions.create({
     customer,
     mode: "subscription",
-    // @ts-expect-error - ui_mode is a new parameter not available in older Stripe types
     ui_mode: "embedded",
     allow_promotion_codes: true,
     return_url: `${WEBAPP_URL}/api/teams/${teamId}/upgrade?session_id={CHECKOUT_SESSION_ID}`,

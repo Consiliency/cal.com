@@ -405,8 +405,9 @@ async function handler(
   const isPlatformBooking = !!platformClientId;
 
   const eventType = await getEventType({
-    eventTypeId: rawBookingData.eventTypeId as number | undefined,
-    eventTypeSlug: rawBookingData.eventTypeSlug as string | undefined,
+    eventTypeId: typeof rawBookingData.eventTypeId === "number" ? rawBookingData.eventTypeId : undefined,
+    eventTypeSlug:
+      typeof rawBookingData.eventTypeSlug === "string" ? rawBookingData.eventTypeSlug : undefined,
   });
 
   const bookingDataSchema = bookingDataSchemaGetter({
@@ -706,6 +707,8 @@ async function handler(
       }),
     };
     if (input.bookingData.allRecurringDates && input.bookingData.isFirstRecurringSlot) {
+      const allRecurringDates = input.bookingData.allRecurringDates as Array<{ start: string; end: string }>;
+      const numSlotsToCheckForAvailability = input.bookingData.numSlotsToCheckForAvailability as number;
       const isTeamEvent =
         eventType.schedulingType === SchedulingType.COLLECTIVE ||
         eventType.schedulingType === SchedulingType.ROUND_ROBIN;
@@ -714,14 +717,9 @@ async function handler(
         ? eventTypeWithUsers.users.filter((user: IsFixedAwareUserWithCredentials) => user.isFixed)
         : [];
 
-      for (
-        let i = 0;
-        i < input.bookingData.allRecurringDates.length &&
-        i < input.bookingData.numSlotsToCheckForAvailability;
-        i++
-      ) {
-        const start = input.bookingData.allRecurringDates[i].start;
-        const end = input.bookingData.allRecurringDates[i].end;
+      for (let i = 0; i < allRecurringDates.length && i < numSlotsToCheckForAvailability; i++) {
+        const start = allRecurringDates[i].start;
+        const end = allRecurringDates[i].end;
         if (isTeamEvent) {
           // each fixed user must be available
           for (const key in fixedUsers) {
@@ -861,14 +859,14 @@ async function handler(
         ) {
           // for recurring round robin events check if lucky user is available for next slots
           try {
-            for (
-              let i = 0;
-              i < input.bookingData.allRecurringDates.length &&
-              i < input.bookingData.numSlotsToCheckForAvailability;
-              i++
-            ) {
-              const start = input.bookingData.allRecurringDates[i].start;
-              const end = input.bookingData.allRecurringDates[i].end;
+            const allRecurringDates = input.bookingData.allRecurringDates as Array<{
+              start: string;
+              end: string;
+            }>;
+            const numSlotsToCheckForAvailability = input.bookingData.numSlotsToCheckForAvailability as number;
+            for (let i = 0; i < allRecurringDates.length && i < numSlotsToCheckForAvailability; i++) {
+              const start = allRecurringDates[i].start;
+              const end = allRecurringDates[i].end;
 
               await ensureAvailableUsers(
                 { ...eventTypeWithUsers, users: [newLuckyUser] },
@@ -1156,7 +1154,10 @@ async function handler(
     })
     .build();
 
-  if (input.bookingData.thirdPartyRecurringEventId) {
+  if (
+    input.bookingData.thirdPartyRecurringEventId &&
+    typeof input.bookingData.thirdPartyRecurringEventId === "string"
+  ) {
     evt = CalendarEventBuilder.fromEvent(evt)
       .withRecurringEventId(input.bookingData.thirdPartyRecurringEventId)
       .build();
@@ -1373,7 +1374,7 @@ async function handler(
         },
         evt,
         originalRescheduledBooking,
-        creationSource: input.bookingData.creationSource,
+        creationSource: input.bookingData.creationSource as CreationSource | undefined,
         tracking: reqBody.tracking,
       });
 
@@ -1413,11 +1414,11 @@ async function handler(
         .build();
 
       if (booking && booking.id && eventType.seatsPerTimeSlot) {
+        const responses = input.bookingData.responses as any;
         const currentAttendee = booking.attendees.find(
           (attendee) =>
-            attendee.email === input.bookingData.responses.email ||
-            (input.bookingData.responses.attendeePhoneNumber &&
-              attendee.phoneNumber === input.bookingData.responses.attendeePhoneNumber)
+            attendee.email === responses.email ||
+            (responses.attendeePhoneNumber && attendee.phoneNumber === responses.attendeePhoneNumber)
         );
 
         // Save description to bookingSeat
@@ -2216,7 +2217,7 @@ async function handler(
       isNotConfirmed: rescheduleUid ? false : !isConfirmedByDefault,
       isRescheduleEvent: !!rescheduleUid,
       isFirstRecurringEvent: input.bookingData.allRecurringDates
-        ? input.bookingData.isFirstRecurringSlot
+        ? !!input.bookingData.isFirstRecurringSlot
         : undefined,
       hideBranding: !!eventType.owner?.hideBranding,
       seatReferenceUid: evt.attendeeSeatId,

@@ -49,7 +49,7 @@ export class StripeService {
     private readonly usersRepository: UsersRepository
   ) {
     this.stripe = new Stripe(configService.get("stripe.apiKey", { infer: true }) ?? "", {
-      apiVersion: "2020-08-27" as const,
+      apiVersion: "2025-06-30.basil" as const,
     });
   }
 
