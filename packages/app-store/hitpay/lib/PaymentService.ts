@@ -13,6 +13,7 @@ import type { CalendarEvent } from "@calcom/types/Calendar";
 import type { IAbstractPaymentService } from "@calcom/types/PaymentService";
 
 import appConfig from "../config.json";
+import { paymentOptionEnum } from "../zod";
 import { API_HITPAY, SANDBOX_API_HITPAY } from "./constants";
 import { hitpayCredentialKeysSchema } from "./hitpayCredentialKeysSchema";
 import type { PaidBooking } from "./types";
@@ -41,6 +42,12 @@ export class PaymentService implements IAbstractPaymentService {
     bookerEmail: string
   ) {
     try {
+      // Ensure that the payment service can support the passed payment option
+      const parsedOption = paymentOptionEnum.parse(paymentOption);
+      if (parsedOption !== "ON_BOOKING" && parsedOption !== "SYNC_BOOKING") {
+        throw new Error("Payment option is not compatible with create method");
+      }
+
       const booking: PaidBooking | null = await prisma.booking.findUnique({
         where: {
           id: bookingId,
@@ -165,6 +172,7 @@ export class PaymentService implements IAbstractPaymentService {
           fee: 0,
           refunded: false,
           success: false,
+          paymentOption: paymentOption || "ON_BOOKING",
         },
       });
 

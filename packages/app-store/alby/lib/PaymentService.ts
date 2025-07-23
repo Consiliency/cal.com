@@ -10,6 +10,7 @@ import prisma from "@calcom/prisma";
 import type { CalendarEvent } from "@calcom/types/Calendar";
 import type { IAbstractPaymentService } from "@calcom/types/PaymentService";
 
+import { paymentOptionEnum } from "../zod";
 import { albyCredentialKeysSchema } from "./albyCredentialKeysSchema";
 
 const log = logger.getSubLogger({ prefix: ["payment-service:alby"] });
@@ -28,9 +29,22 @@ export class PaymentService implements IAbstractPaymentService {
 
   async create(
     payment: Pick<Prisma.PaymentUncheckedCreateInput, "amount" | "currency">,
-    bookingId: Booking["id"]
+    bookingId: Booking["id"],
+    userId: Booking["userId"],
+    username: string | null,
+    bookerName: string | null,
+    paymentOption: PaymentOption = "ON_BOOKING",
+    bookerEmail: string,
+    bookerPhoneNumber?: string | null,
+    eventTitle?: string,
+    bookingTitle?: string
   ) {
     try {
+      // Ensure that the payment service can support the passed payment option
+      const parsedOption = paymentOptionEnum.parse(paymentOption);
+      if (parsedOption !== "ON_BOOKING" && parsedOption !== "SYNC_BOOKING") {
+        throw new Error("Payment option is not compatible with create method");
+      }
       const booking = await prisma.booking.findUnique({
         select: {
           uid: true,
@@ -80,6 +94,7 @@ export class PaymentService implements IAbstractPaymentService {
           fee: 0,
           refunded: false,
           success: false,
+          paymentOption: paymentOption || "ON_BOOKING",
         },
       });
 

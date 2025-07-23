@@ -75,6 +75,7 @@ export const BookerPlatformWrapper = (
   const [isOverlayCalendarEnabled, setIsOverlayCalendarEnabled] = useState(
     Boolean(localStorage?.getItem?.("overlayCalendarSwitchDefault"))
   );
+  const [hasAttemptedSubmission, setHasAttemptedSubmission] = useState(false);
   const prevStateRef = useRef<BookerStoreValues | null>(null);
   const getStateValues = useCallback(
     (state: ReturnType<typeof useBookerStore.getState>): BookerStoreValues => {
@@ -303,6 +304,7 @@ export const BookerPlatformWrapper = (
     isError: isCreateBookingError,
   } = useCreateBooking({
     onSuccess: (data) => {
+      setHasAttemptedSubmission(false);
       if (data?.data?.isDryRun) {
         props?.onDryRunSuccess?.();
       }
@@ -323,6 +325,7 @@ export const BookerPlatformWrapper = (
     isError: isCreateRecBookingError,
   } = useCreateRecurringBooking({
     onSuccess: (data) => {
+      setHasAttemptedSubmission(false);
       if (data?.data?.[0]?.isDryRun) {
         props?.onDryRunSuccess?.();
       }
@@ -342,6 +345,7 @@ export const BookerPlatformWrapper = (
     isError: isCreateInstantBookingError,
   } = useCreateInstantBooking({
     onSuccess: (data) => {
+      setHasAttemptedSubmission(false);
       schedule.refetch();
       props.onCreateInstantBookingSuccess?.(data);
     },
@@ -395,6 +399,15 @@ export const BookerPlatformWrapper = (
     routingFormSearchParams,
   });
 
+  // Wrapper to track submission attempts
+  const handleBookEventWithTracking = useCallback(
+    (timeSlot?: string) => {
+      setHasAttemptedSubmission(true);
+      handleBookEvent(timeSlot);
+    },
+    [handleBookEvent]
+  );
+
   const onOverlaySwitchStateChange = useCallback(
     (state: boolean) => {
       setIsOverlayCalendarEnabled(state);
@@ -424,6 +437,7 @@ export const BookerPlatformWrapper = (
       setSelectedDuration(null);
       setOrg(null);
       setSelectedMonth(null);
+      setHasAttemptedSubmission(false);
       if (props.rescheduleUid) {
         // clean booking data from cache
         queryClient.removeQueries({
@@ -484,15 +498,19 @@ export const BookerPlatformWrapper = (
         extraOptions={extraOptions ?? {}}
         bookings={{
           handleBookEvent: (timeSlot?: string) => {
-            handleBookEvent(timeSlot);
+            handleBookEventWithTracking(timeSlot);
             return;
           },
           expiryTime: undefined,
           bookingForm: bookerForm.bookingForm,
           bookerFormErrorRef: bookerForm.bookerFormErrorRef,
           errors: {
-            hasDataErrors: isCreateBookingError || isCreateRecBookingError || isCreateInstantBookingError,
-            dataErrors: createBookingError || createRecBookingError || createInstantBookingError,
+            hasDataErrors:
+              hasAttemptedSubmission &&
+              (isCreateBookingError || isCreateRecBookingError || isCreateInstantBookingError),
+            dataErrors: hasAttemptedSubmission
+              ? createBookingError || createRecBookingError || createInstantBookingError
+              : null,
           },
           loadingStates: {
             creatingBooking: creatingBooking,

@@ -14,6 +14,10 @@ export const paymentOptions = [
     label: "on_booking_option",
     value: "ON_BOOKING",
   },
+  {
+    label: "sync_booking_option",
+    value: "SYNC_BOOKING",
+  },
 ];
 
 type PaymentOption = (typeof paymentOptions)[number]["value"];

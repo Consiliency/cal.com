@@ -14,6 +14,10 @@ export const PaypalPaymentOptions = [
     label: "on_booking_option",
     value: "ON_BOOKING",
   },
+  {
+    label: "sync_booking_option",
+    value: "SYNC_BOOKING",
+  },
   // @TODO: not required right now
   // {
   //   label: "hold_option",

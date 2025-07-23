@@ -9,17 +9,21 @@ const paymentOptionSchema = z.object({
 
 export const paymentOptionsSchema = z.array(paymentOptionSchema);
 
-export const PaypalPaymentOptions = [
+export const AlbyPaymentOptions = [
   {
     label: "on_booking_option",
     value: "ON_BOOKING",
   },
+  {
+    label: "sync_booking_option",
+    value: "SYNC_BOOKING",
+  },
 ];
 
-type PaymentOption = (typeof PaypalPaymentOptions)[number]["value"];
+type PaymentOption = (typeof AlbyPaymentOptions)[number]["value"];
 const VALUES: [PaymentOption, ...PaymentOption[]] = [
-  PaypalPaymentOptions[0].value,
-  ...PaypalPaymentOptions.slice(1).map((option) => option.value),
+  AlbyPaymentOptions[0].value,
+  ...AlbyPaymentOptions.slice(1).map((option) => option.value),
 ];
 export const paymentOptionEnum = z.enum(VALUES);
 

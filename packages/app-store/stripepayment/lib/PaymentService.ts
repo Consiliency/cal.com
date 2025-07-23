@@ -71,7 +71,8 @@ export class PaymentService implements IAbstractPaymentService {
   ) {
     try {
       // Ensure that the payment service can support the passed payment option
-      if (paymentOptionEnum.parse(paymentOption) !== "ON_BOOKING") {
+      const parsedOption = paymentOptionEnum.parse(paymentOption);
+      if (parsedOption !== "ON_BOOKING" && parsedOption !== "SYNC_BOOKING") {
         throw new Error("Payment option is not compatible with create method");
       }
 
