@@ -61,6 +61,7 @@ export const generateTeamCheckoutSession = async ({
   const session = await stripe.checkout.sessions.create({
     customer,
     mode: "subscription",
+    // @ts-expect-error - ui_mode exists at runtime but not in the type definitions yet
     ui_mode: "embedded",
     ...(dubCustomer?.discount?.couponId
       ? {
@@ -176,6 +177,7 @@ export const purchaseTeamOrOrgSubscription = async (input: {
   const session = await stripe.checkout.sessions.create({
     customer,
     mode: "subscription",
+    // @ts-expect-error - ui_mode exists at runtime but not in the type definitions yet
     ui_mode: "embedded",
     allow_promotion_codes: true,
     return_url: `${WEBAPP_URL}/api/teams/${teamId}/upgrade?session_id={CHECKOUT_SESSION_ID}`,
