@@ -9,7 +9,7 @@ import { z } from "zod";
 import { getRequestedSlugError } from "@calcom/app-store/stripepayment/lib/team-billing";
 import { getServerSession } from "@calcom/features/auth/lib/getServerSession";
 import stripe from "@calcom/features/ee/payments/server/stripe";
-import { WEBAPP_URL } from "@calcom/lib/constants";
+import { WEBAPP_URL, IS_SELF_HOSTED } from "@calcom/lib/constants";
 import { HttpError } from "@calcom/lib/http-error";
 import prisma from "@calcom/prisma";
 import { teamMetadataSchema } from "@calcom/prisma/zod-utils";
@@ -18,16 +18,50 @@ import { buildLegacyRequest } from "@lib/buildLegacyCtx";
 
 const querySchema = z.object({
   team: z.string().transform((val) => parseInt(val)),
-  session_id: z.string().min(1),
+  session_id: z.string().min(1).optional(),
+  self_hosted: z.string().optional(),
 });
 
 async function getHandler(req: NextRequest, { params }: { params: Promise<Params> }) {
   try {
     const searchParams = req.nextUrl.searchParams;
-    const { team: id, session_id } = querySchema.parse({
+    const {
+      team: id,
+      session_id,
+      self_hosted,
+    } = querySchema.parse({
       team: (await params).team,
       session_id: searchParams.get("session_id"),
+      self_hosted: searchParams.get("self_hosted"),
     });
+
+    // Handle self-hosted instances
+    if (IS_SELF_HOSTED || self_hosted) {
+      const team = await prisma.team.findFirstOrThrow({ where: { id } });
+
+      // Update team metadata to mark as "paid" for self-hosted
+      await prisma.team.update({
+        where: { id },
+        data: {
+          metadata: {
+            ...teamMetadataSchema.parse(team.metadata),
+            paymentId: "self-hosted",
+            subscriptionId: "self-hosted",
+            subscriptionItemId: "self-hosted",
+          },
+        },
+      });
+
+      const redirectUrl = team?.isOrganization
+        ? `${WEBAPP_URL}/settings/organizations/profile?upgraded=true`
+        : `${WEBAPP_URL}/settings/teams/${team.id}/profile?upgraded=true`;
+
+      return NextResponse.redirect(redirectUrl);
+    }
+
+    if (!session_id) {
+      throw new HttpError({ statusCode: 400, message: "Session ID required for non-self-hosted" });
+    }
 
     const checkoutSession = await stripe.checkout.sessions.retrieve(session_id, {
       expand: ["subscription"],

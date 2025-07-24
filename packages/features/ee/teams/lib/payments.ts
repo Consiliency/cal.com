@@ -6,6 +6,7 @@ import { getDubCustomer } from "@calcom/features/auth/lib/dub";
 import stripe from "@calcom/features/ee/payments/server/stripe";
 import {
   IS_PRODUCTION,
+  IS_SELF_HOSTED,
   MINIMUM_NUMBER_OF_ORG_SEATS,
   ORGANIZATION_SELF_SERVE_MIN_SEATS,
   ORGANIZATION_SELF_SERVE_PRICE,
@@ -138,6 +139,12 @@ export const purchaseTeamOrOrgSubscription = async (input: {
     pricePerSeat,
     billingPeriod = BillingPeriod.MONTHLY,
   } = input;
+
+  // For self-hosted instances, skip payment and return success URL
+  if (IS_SELF_HOSTED) {
+    return { url: `${WEBAPP_URL}/api/teams/${teamId}/upgrade?self_hosted=true` };
+  }
+
   const { url } = await checkIfTeamPaymentRequired({ teamId });
   if (url) return { url };
 

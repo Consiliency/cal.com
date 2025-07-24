@@ -1,4 +1,4 @@
-import { IS_TEAM_BILLING_ENABLED } from "@calcom/lib/constants";
+import { IS_TEAM_BILLING_ENABLED, IS_SELF_HOSTED } from "@calcom/lib/constants";
 import { prisma } from "@calcom/prisma";
 import { MembershipRole } from "@calcom/prisma/enums";
 import { teamMetadataSchema } from "@calcom/prisma/zod-utils";
@@ -13,6 +13,9 @@ type GetUpgradeableOptions = {
 
 export async function checkIfOrgNeedsUpgradeHandler({ ctx }: GetUpgradeableOptions) {
   if (!IS_TEAM_BILLING_ENABLED) return [];
+
+  // For self-hosted instances, orgs don't need upgrades
+  if (IS_SELF_HOSTED) return [];
 
   // Get all teams/orgs where the user is an owner
   let teams = await prisma.membership.findMany({
