@@ -1,7 +1,7 @@
 import * as cache from "memory-cache";
 
 import { getDeploymentKey } from "@calcom/features/ee/deployment/lib/getDeploymentKey";
-import { CALCOM_PRIVATE_API_ROUTE } from "@calcom/lib/constants";
+import { CALCOM_PRIVATE_API_ROUTE, IS_SELF_HOSTED } from "@calcom/lib/constants";
 import logger from "@calcom/lib/logger";
 import type { IDeploymentRepository } from "@calcom/lib/server/repository/deployment.interface";
 
@@ -89,6 +89,8 @@ class LicenseKeyService implements ILicenseKeyService {
   async checkLicense(): Promise<boolean> {
     /** We skip for E2E testing */
     if (process.env.NEXT_PUBLIC_IS_E2E === "1") return true;
+    /** We skip for self-hosted instances */
+    if (IS_SELF_HOSTED) return true;
     /** We check first on env */
     const url = `${this.baseUrl}/v1/license/${this.licenseKey}`;
     const cachedResponse = cache.get(url);
@@ -112,7 +114,7 @@ export class NoopLicenseKeyService implements ILicenseKeyService {
   }
 
   async checkLicense(): Promise<boolean> {
-    return Promise.resolve(process.env.NEXT_PUBLIC_IS_E2E === "1");
+    return Promise.resolve(process.env.NEXT_PUBLIC_IS_E2E === "1" || IS_SELF_HOSTED);
   }
 }
 
