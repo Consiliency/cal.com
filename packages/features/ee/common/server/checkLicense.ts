@@ -1,7 +1,7 @@
 import cache from "memory-cache";
 import { z } from "zod";
 
-import { CONSOLE_URL } from "@calcom/lib/constants";
+import { CONSOLE_URL, IS_SELF_HOSTED } from "@calcom/lib/constants";
 import type { PrismaClient } from "@calcom/prisma";
 
 const CACHING_TIME = 86400000; // 24 hours in milliseconds
@@ -25,6 +25,8 @@ async function checkLicense(
 ): Promise<boolean> {
   /** We skip for E2E testing */
   if (!!process.env.NEXT_PUBLIC_IS_E2E) return true;
+  /** We skip for self-hosted instances */
+  if (IS_SELF_HOSTED) return true;
   /** We check first on env */
   let licenseKey = process.env.CALCOM_LICENSE_KEY;
   if (!licenseKey) {
