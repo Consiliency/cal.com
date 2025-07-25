@@ -30,7 +30,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       data: {
         type: appType,
         key: {},
-        userId: req.session.user.id,
+        ...installForObject,
         appId: "paypal",
       },
     });
