@@ -37,11 +37,25 @@ export const handleCustomValidations = async ({
 export const updateAppCredentialsHandler = async ({ ctx, input }: UpdateAppCredentialsOptions) => {
   const { user } = ctx;
 
-  // Find user credential
+  // Find user or team credential
   const credential = await prisma.credential.findFirst({
     where: {
       id: input.credentialId,
-      userId: user.id,
+      OR: [
+        { userId: user.id },
+        {
+          team: {
+            members: {
+              some: {
+                userId: user.id,
+                role: {
+                  in: ["ADMIN", "OWNER"],
+                },
+              },
+            },
+          },
+        },
+      ],
     },
   });
   // Check if credential exists
