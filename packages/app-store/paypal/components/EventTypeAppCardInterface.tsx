@@ -1,5 +1,5 @@
 import { usePathname, useSearchParams } from "next/navigation";
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 
 import { useAppContextWithSchema } from "@calcom/app-store/EventTypeAppContext";
 import AppCard from "@calcom/app-store/_components/AppCard";
@@ -8,6 +8,7 @@ import { WEBAPP_URL } from "@calcom/lib/constants";
 import { useLocale } from "@calcom/lib/hooks/useLocale";
 
 import checkForMultiplePaymentApps from "../../_utils/payments/checkForMultiplePaymentApps";
+import useIsAppEnabled from "../../_utils/useIsAppEnabled";
 import type { appDataSchema } from "../zod";
 import EventTypeAppSettingsInterface from "./EventTypeAppSettingsInterface";
 
@@ -24,21 +25,22 @@ const EventTypeAppCard: EventTypeAppCardComponent = function EventTypeAppCard({
     [pathname, searchParams]
   );
   const { getAppData, setAppData, disabled } = useAppContextWithSchema<typeof appDataSchema>();
-  const [requirePayment, setRequirePayment] = useState(getAppData("enabled"));
+  const { enabled, updateEnabled } = useIsAppEnabled(app);
   const otherPaymentAppEnabled = checkForMultiplePaymentApps(eventTypeFormMetadata);
   const { t } = useLocale();
 
-  const shouldDisableSwitch = !requirePayment && otherPaymentAppEnabled;
+  const shouldDisableSwitch = !enabled && otherPaymentAppEnabled;
 
   return (
     <AppCard
       returnTo={WEBAPP_URL + asPath}
       app={app}
-      switchChecked={requirePayment}
-      switchOnClick={(enabled) => {
-        setRequirePayment(enabled);
+      switchChecked={enabled}
+      switchOnClick={(e) => {
+        updateEnabled(e);
       }}
       description={<>Add Paypal payment to your events</>}
+      teamId={eventType.team?.id || undefined}
       disableSwitch={shouldDisableSwitch}
       switchTooltip={shouldDisableSwitch ? t("other_payment_app_enabled") : undefined}>
       <>

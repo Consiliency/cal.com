@@ -7,9 +7,9 @@ import {
 } from "@calcom/app-store/paypal/lib/currencyOptions";
 import type { EventTypeAppSettingsComponent } from "@calcom/app-store/types";
 import { useLocale } from "@calcom/lib/hooks/useLocale";
+import { Alert } from "@calcom/ui/components/alert";
 import { Select } from "@calcom/ui/components/form";
 import { TextField } from "@calcom/ui/components/form";
-import { Alert } from "@calcom/ui/components/alert";
 
 import {
   convertToSmallestCurrencyUnit,
@@ -50,8 +50,11 @@ const EventTypeAppSettingsInterface: EventTypeAppSettingsComponent = ({
       if (!getAppData("paymentOption")) {
         setAppData("paymentOption", paymentOptions[0].value);
       }
+      setAppData("enabled", true);
+    } else {
+      setAppData("enabled", false);
     }
-  }, []);
+  }, [requirePayment, getAppData, setAppData]);
 
   if (recurringEventDefined) {
     return <Alert className="mt-2" severity="warning" title={t("warning_recurring_event_payment")} />;
