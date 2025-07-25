@@ -20,9 +20,9 @@ const EventTypeAppCard: EventTypeAppCardComponent = function EventTypeAppCard({
   const { t } = useLocale();
   const pathname = usePathname();
   const { getAppData, setAppData, disabled } = useAppContextWithSchema<typeof appDataSchema>();
-  const { enabled, updateEnabled } = useIsAppEnabled(app);
+  const { enabled, updateEnabled } = useIsAppEnabled(app, eventType.team?.id);
   const otherPaymentAppEnabled = checkForMultiplePaymentApps(eventTypeFormMetadata);
-  const [requirePayment, setRequirePayment] = useState(getAppData("enabled"));
+  const [requirePayment] = useState(getAppData("enabled"));
   const shouldDisableSwitch = !requirePayment && otherPaymentAppEnabled;
 
   return (

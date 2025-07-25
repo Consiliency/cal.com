@@ -4,7 +4,7 @@ import { useAppContextWithSchema } from "@calcom/app-store/EventTypeAppContext";
 
 import type { EventTypeAppCardApp } from "../types";
 
-function useIsAppEnabled(app: EventTypeAppCardApp) {
+function useIsAppEnabled(app: EventTypeAppCardApp, teamId?: number | null) {
   const { getAppData, setAppData } = useAppContextWithSchema();
   const [enabled, setEnabled] = useState(() => {
     const isAppEnabled = getAppData("enabled");
@@ -26,8 +26,26 @@ function useIsAppEnabled(app: EventTypeAppCardApp) {
       setAppData("credentialId", undefined);
     }
 
-    if (newValue && (app.userCredentialIds?.length || app.credentialOwner?.credentialId)) {
-      setAppData("credentialId", app.credentialOwner?.credentialId || app.userCredentialIds[0]);
+    if (newValue) {
+      // Check for team credentials - cast to any to handle missing type definition
+      const teamCredentials = (app as any).teams || [];
+
+      // If this is a team event and we have team credentials, use them
+      if (teamId && teamCredentials.length > 0) {
+        const teamCredential = teamCredentials.find(
+          (t: { teamId: number; credentialId: number }) => t.teamId === teamId
+        );
+        if (teamCredential) {
+          setAppData("credentialId", teamCredential.credentialId);
+        } else {
+          // Fallback to first team credential if specific team not found
+          setAppData("credentialId", teamCredentials[0].credentialId);
+        }
+      } else if (app.credentialOwner?.credentialId) {
+        setAppData("credentialId", app.credentialOwner.credentialId);
+      } else if (app.userCredentialIds?.length) {
+        setAppData("credentialId", app.userCredentialIds[0]);
+      }
     }
     setEnabled(newValue);
   };

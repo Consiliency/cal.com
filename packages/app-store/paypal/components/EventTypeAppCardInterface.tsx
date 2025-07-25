@@ -25,7 +25,7 @@ const EventTypeAppCard: EventTypeAppCardComponent = function EventTypeAppCard({
     [pathname, searchParams]
   );
   const { getAppData, setAppData, disabled } = useAppContextWithSchema<typeof appDataSchema>();
-  const { enabled, updateEnabled } = useIsAppEnabled(app);
+  const { enabled, updateEnabled } = useIsAppEnabled(app, eventType.team?.id);
   const otherPaymentAppEnabled = checkForMultiplePaymentApps(eventTypeFormMetadata);
   const { t } = useLocale();
 

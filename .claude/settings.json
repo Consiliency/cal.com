@@ -2,5 +2,51 @@
   "permissions": {
     "allow": ["WebFetch", "Fetch"],
     "deny": []
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv run .claude/hooks/pre_tool_use.py"
+          },
+          {
+            "type": "command",
+            "command": "uv run .claude/hooks/send_event.py --source-app cal_com --event-type PreToolUse --summarize"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv run .claude/hooks/post_tool_use.py"
+          },
+          {
+            "type": "command",
+            "command": "uv run .claude/hooks/send_event.py --source-app cal_com --event-type PostToolUse --summarize"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv run .claude/hooks/user_prompt_submit.py --log-only"
+          },
+          {
+            "type": "command",
+            "command": "uv run .claude/hooks/send_event.py --source-app cal_com --event-type UserPromptSubmit --summarize"
+          }
+        ]
+      }
+    ]
   }
 }
