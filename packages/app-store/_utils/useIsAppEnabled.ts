@@ -48,6 +48,7 @@ function useIsAppEnabled(app: EventTypeAppCardApp, teamId?: number | null) {
       }
     }
     setEnabled(newValue);
+    setAppData("enabled", newValue);
   };
 
   return { enabled, updateEnabled };

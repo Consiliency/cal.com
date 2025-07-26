@@ -50,9 +50,6 @@ const EventTypeAppSettingsInterface: EventTypeAppSettingsComponent = ({
       if (!getAppData("paymentOption")) {
         setAppData("paymentOption", paymentOptions[0].value);
       }
-      setAppData("enabled", true);
-    } else {
-      setAppData("enabled", false);
     }
   }, [requirePayment, getAppData, setAppData]);
 
