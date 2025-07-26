@@ -128,7 +128,9 @@ export default function AppCard({
               {app.isSetupAlready === undefined || app.isSetupAlready ? (
                 <div className="relative text-sm [&_input]:mb-0 [&_input]:leading-4">
                   {!hideSettingsIcon && !isPlatform && (
-                    <Link href={`/apps/${app.slug}/setup`} className="absolute right-4 top-4">
+                    <Link
+                      href={`/apps/${app.slug}/setup${teamId ? `?teamId=${teamId}` : ""}`}
+                      className="absolute right-4 top-4">
                       <Icon name="settings" className="text-default h-4 w-4" aria-hidden="true" />
                     </Link>
                   )}
@@ -137,7 +139,7 @@ export default function AppCard({
               ) : (
                 <div className="flex h-64 w-full flex-col items-center justify-center gap-4 ">
                   <p>{t("this_app_is_not_setup_already")}</p>
-                  <Link href={`/apps/${app.slug}/setup`}>
+                  <Link href={`/apps/${app.slug}/setup${teamId ? `?teamId=${teamId}` : ""}`}>
                     <Button StartIcon="settings">{t("setup")}</Button>
                   </Link>
                 </div>
