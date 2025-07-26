@@ -46,7 +46,7 @@ export default function PayPalSetup() {
       showToast(t("keys_have_been_saved"), "success");
       // Redirect back to appropriate page based on context
       if (teamId) {
-        router.push(`/settings/teams/${teamId}/apps`);
+        router.push(`/settings/teams/${teamId}/settings?hl=paypal`);
       } else {
         router.push("/event-types");
       }
