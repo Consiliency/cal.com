@@ -1,12 +1,12 @@
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { Toaster } from "sonner";
 
 import AppNotInstalledMessage from "@calcom/app-store/_components/AppNotInstalledMessage";
 import { useLocale } from "@calcom/lib/hooks/useLocale";
 import { trpc } from "@calcom/trpc";
-import { TextField } from "@calcom/ui/components/form";
 import { Button } from "@calcom/ui/components/button";
+import { TextField } from "@calcom/ui/components/form";
 import { Icon } from "@calcom/ui/components/icon";
 import { showToast } from "@calcom/ui/components/toast";
 
@@ -14,15 +14,42 @@ export default function PayPalSetup() {
   const [newClientId, setNewClientId] = useState("");
   const [newSecretKey, setNewSecretKey] = useState("");
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const teamId = searchParams.get("teamId");
   const { t } = useLocale();
-  const integrations = trpc.viewer.apps.integrations.useQuery({ variant: "payment", appId: "paypal" });
+  const integrations = trpc.viewer.apps.integrations.useQuery({
+    variant: "payment",
+    appId: "paypal",
+    ...(teamId && { teamId: parseInt(teamId) }),
+  });
   const [paypalPaymentAppCredentials] = integrations.data?.items || [];
-  const [credentialId] = paypalPaymentAppCredentials?.userCredentialIds || [-1];
-  const showContent = !!integrations.data && integrations.isSuccess && !!credentialId;
+
+  // Determine which credential ID to use based on context
+  let credentialId = -1;
+  if (paypalPaymentAppCredentials) {
+    if (teamId && paypalPaymentAppCredentials.teams?.length > 0) {
+      // Find the team credential for this specific team
+      const teamCredential = paypalPaymentAppCredentials.teams.find(
+        (team: any) => team.teamId === parseInt(teamId)
+      );
+      credentialId = teamCredential?.credentialId || -1;
+    } else {
+      // Use personal credential
+      const [personalCredentialId] = paypalPaymentAppCredentials.userCredentialIds || [-1];
+      credentialId = personalCredentialId;
+    }
+  }
+
+  const showContent = !!integrations.data && integrations.isSuccess && credentialId !== -1;
   const saveKeysMutation = trpc.viewer.apps.updateAppCredentials.useMutation({
     onSuccess: () => {
       showToast(t("keys_have_been_saved"), "success");
-      router.push("/event-types");
+      // Redirect back to appropriate page based on context
+      if (teamId) {
+        router.push(`/settings/teams/${teamId}/apps`);
+      } else {
+        router.push("/event-types");
+      }
     },
     onError: (error) => {
       showToast(error.message, "error");
