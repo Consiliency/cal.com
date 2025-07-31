@@ -26,17 +26,30 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Get the Stripe credentials - either specific credential by ID or user's credentials
     // First try to find a credential (OAuth connection)
-    const credential = await prisma.credential.findFirst({
-      where: credentialId
-        ? {
-            id: parseInt(credentialId as string),
-            type: "stripe_payment",
-          }
-        : {
-            userId,
-            type: "stripe_payment",
-          },
-    });
+    let credential = null;
+
+    if (credentialId) {
+      // If credentialId is provided, try to find it but don't fail if not found
+      // This handles the case where frontend passes credentialId for manual configs
+      credential = await prisma.credential.findFirst({
+        where: {
+          id: parseInt(credentialId as string),
+          type: "stripe_payment",
+        },
+      });
+
+      if (!credential) {
+        log.warn("Credential not found with ID, checking for manual configuration", { credentialId });
+      }
+    } else {
+      // No credentialId provided, try to find user's credential
+      credential = await prisma.credential.findFirst({
+        where: {
+          userId,
+          type: "stripe_payment",
+        },
+      });
+    }
 
     let stripeUserId: string | undefined;
     let isManuallyConfigured = false;

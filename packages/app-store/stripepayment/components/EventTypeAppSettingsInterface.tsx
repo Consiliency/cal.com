@@ -85,34 +85,46 @@ const EventTypeAppSettingsInterface: EventTypeAppSettingsComponent = ({
       // Get the credentialId from app data if available
       const credentialId = getAppData("credentialId");
       const params = new URLSearchParams();
-      if (credentialId) {
+
+      // Only append credentialId if it exists and is not undefined
+      // This allows manual configurations to work without credentials
+      if (credentialId && credentialId !== undefined) {
         params.append("credentialId", credentialId.toString());
       }
+
       // Add debug flag to get more info
       params.append("debug", "true");
-      
+
       // Add platform account flag if needed
       if (usePlatformAccount) {
         params.append("usePlatformAccount", "true");
       }
-      
-      const response = await fetch(`/api/integrations/stripe/products${params.toString() ? `?${params.toString()}` : ""}`);
+
+      const response = await fetch(
+        `/api/integrations/stripe/products${params.toString() ? `?${params.toString()}` : ""}`
+      );
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.error || "Failed to fetch products");
       }
       const data = await response.json();
-      
+
       // Log debug info if available
       if (data.debug) {
         console.log("Stripe Products Debug Info:", data.debug);
-        
+
         // If no products found in connected account, suggest trying platform account
-        if (data.debug.results.formattedProductsCount === 0 && !usePlatformAccount && data.debug.accounts.isUsingConnectedAccount) {
-          console.log("No products found in connected account. Try fetching from platform account by calling: fetchStripeProducts(true)");
+        if (
+          data.debug.results.formattedProductsCount === 0 &&
+          !usePlatformAccount &&
+          data.debug.accounts.isUsingConnectedAccount
+        ) {
+          console.log(
+            "No products found in connected account. Try fetching from platform account by calling: fetchStripeProducts(true)"
+          );
         }
       }
-      
+
       setStripeProducts(data.products || []);
     } catch (error) {
       console.error("Error fetching Stripe products:", error);
@@ -147,7 +159,7 @@ const EventTypeAppSettingsInterface: EventTypeAppSettingsComponent = ({
       (window as any).fetchStripeProducts = fetchStripeProducts;
       console.log("Debug: You can now call window.fetchStripeProducts(true) to fetch from platform account");
     }
-    
+
     return () => {
       if (typeof window !== "undefined") {
         delete (window as any).fetchStripeProducts;

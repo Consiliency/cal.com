@@ -10,11 +10,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "uv run --script .claude/hooks/pre_tool_use.py"
+            "command": "uv run --script $(git rev-parse --show-toplevel)/.claude/hooks/pre_tool_use.py"
           },
           {
             "type": "command",
-            "command": "uv run --script .claude/hooks/send_event.py --source-app cal_com --event-type PreToolUse --summarize"
+            "command": "uv run --script $(git rev-parse --show-toplevel)/.claude/hooks/send_event.py --source-app cal_com --event-type PreToolUse --summarize"
           }
         ]
       }
@@ -25,11 +25,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "uv run --script .claude/hooks/post_tool_use.py"
+            "command": "uv run --script $(git rev-parse --show-toplevel)/.claude/hooks/post_tool_use.py"
           },
           {
             "type": "command",
-            "command": "uv run --script .claude/hooks/send_event.py --source-app cal_com --event-type PostToolUse --summarize"
+            "command": "uv run --script $(git rev-parse --show-toplevel)/.claude/hooks/send_event.py --source-app cal_com --event-type PostToolUse --summarize"
           }
         ]
       }
@@ -40,11 +40,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "uv run --script .claude/hooks/notification.py --notify "
+            "command": "uv run --script $(git rev-parse --show-toplevel)/.claude/hooks/notification.py --notify "
           },
           {
             "type": "command",
-            "command": "uv run --script .claude/hooks/send_event.py --source-app cal_com --event-type Notification --summarize"
+            "command": "uv run --script $(git rev-parse --show-toplevel)/.claude/hooks/send_event.py --source-app cal_com --event-type Notification --summarize"
           }
         ]
       }
@@ -55,11 +55,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "uv run --script .claude/hooks/stop.py --chat"
+            "command": "uv run --script $(git rev-parse --show-toplevel)/.claude/hooks/stop.py --chat"
           },
           {
             "type": "command",
-            "command": "uv run --script .claude/hooks/send_event.py --source-app cal_com --event-type Stop --add-chat"
+            "command": "uv run --script $(git rev-parse --show-toplevel)/.claude/hooks/send_event.py --source-app cal_com --event-type Stop --add-chat"
           }
         ]
       }
@@ -70,11 +70,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "uv run --script .claude/hooks/subagent_stop.py"
+            "command": "uv run --script $(git rev-parse --show-toplevel)/.claude/hooks/subagent_stop.py"
           },
           {
             "type": "command",
-            "command": "uv run --script .claude/hooks/send_event.py --source-app cc-hook-multi-agent-obvs --event-type SubagentStop"
+            "command": "uv run --script $(git rev-parse --show-toplevel)/.claude/hooks/send_event.py --source-app cc-hook-multi-agent-obvs --event-type SubagentStop"
           }
         ]
       }
@@ -85,7 +85,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "uv run --script .claude/hooks/send_event.py --source-app cal_com --event-type PreCompact"
+            "command": "uv run --script $(git rev-parse --show-toplevel)/.claude/hooks/send_event.py --source-app cal_com --event-type PreCompact"
           }
         ]
       }
@@ -95,11 +95,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "uv run --script .claude/hooks/user_prompt_submit.py --log-only"
+            "command": "uv run --script $(git rev-parse --show-toplevel)/.claude/hooks/user_prompt_submit.py --log-only"
           },
           {
             "type": "command",
-            "command": "uv run --script .claude/hooks/send_event.py --source-app cal_com --event-type UserPromptSubmit --summarize"
+            "command": "uv run --script $(git rev-parse --show-toplevel)/.claude/hooks/send_event.py --source-app cal_com --event-type UserPromptSubmit --summarize"
           }
         ]
       }
