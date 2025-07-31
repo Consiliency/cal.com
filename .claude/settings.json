@@ -10,11 +10,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "uv run .claude/hooks/pre_tool_use.py"
+            "command": "uv run --script .claude/hooks/pre_tool_use.py"
           },
           {
             "type": "command",
-            "command": "uv run .claude/hooks/send_event.py --source-app cal_com --event-type PreToolUse --summarize"
+            "command": "uv run --script .claude/hooks/send_event.py --source-app cal_com --event-type PreToolUse --summarize"
           }
         ]
       }
@@ -25,11 +25,67 @@
         "hooks": [
           {
             "type": "command",
-            "command": "uv run .claude/hooks/post_tool_use.py"
+            "command": "uv run --script .claude/hooks/post_tool_use.py"
           },
           {
             "type": "command",
-            "command": "uv run .claude/hooks/send_event.py --source-app cal_com --event-type PostToolUse --summarize"
+            "command": "uv run --script .claude/hooks/send_event.py --source-app cal_com --event-type PostToolUse --summarize"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv run --script .claude/hooks/notification.py --notify "
+          },
+          {
+            "type": "command",
+            "command": "uv run --script .claude/hooks/send_event.py --source-app cal_com --event-type Notification --summarize"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv run --script .claude/hooks/stop.py --chat"
+          },
+          {
+            "type": "command",
+            "command": "uv run --script .claude/hooks/send_event.py --source-app cal_com --event-type Stop --add-chat"
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv run --script .claude/hooks/subagent_stop.py"
+          },
+          {
+            "type": "command",
+            "command": "uv run --script .claude/hooks/send_event.py --source-app cc-hook-multi-agent-obvs --event-type SubagentStop"
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv run --script .claude/hooks/send_event.py --source-app cal_com --event-type PreCompact"
           }
         ]
       }
@@ -39,11 +95,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "uv run .claude/hooks/user_prompt_submit.py --log-only"
+            "command": "uv run --script .claude/hooks/user_prompt_submit.py --log-only"
           },
           {
             "type": "command",
-            "command": "uv run .claude/hooks/send_event.py --source-app cal_com --event-type UserPromptSubmit --summarize"
+            "command": "uv run --script .claude/hooks/send_event.py --source-app cal_com --event-type UserPromptSubmit --summarize"
           }
         ]
       }

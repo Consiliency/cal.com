@@ -24,6 +24,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const shouldUsePlatformAccount = usePlatformAccount === "true";
 
     // Get the Stripe credentials - either specific credential by ID or user's credentials
+    // First try to find a credential (OAuth connection)
     const credential = await prisma.credential.findFirst({
       where: credentialId
         ? {
@@ -36,24 +37,35 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           },
     });
 
-    if (!credential || !credential.key) {
-      log.error("Stripe credential not found", { credentialId, userId: session.user.id });
-      return res.status(404).json({ error: "Stripe not connected" });
-    }
+    let stripeUserId: string | undefined;
 
-    const credentialKey = credential.key as any;
-    const stripeUserId = credentialKey.stripe_user_id;
+    if (credential && credential.key) {
+      const credentialKey = credential.key as any;
+      stripeUserId = credentialKey.stripe_user_id;
+    } else {
+      // If no credential found, check if Stripe is configured via admin interface
+      const stripeApp = await prisma.app.findUnique({
+        where: { slug: "stripe" },
+      });
 
-    if (!stripeUserId) {
-      log.error("Invalid Stripe credentials - no stripe_user_id", { credentialId: credential.id });
-      return res.status(400).json({ error: "Invalid Stripe credentials" });
+      if (!stripeApp || !stripeApp.keys || !stripeApp.enabled) {
+        log.error("Stripe not configured", { credentialId, userId: session.user.id });
+        return res
+          .status(404)
+          .json({ error: "Stripe not connected. Please connect via OAuth or configure in admin settings." });
+      }
+
+      // For manually configured apps, we don't have a connected account
+      // Products should be created on the platform account
+      log.info("Using platform account for manually configured Stripe app");
     }
 
     log.info("Fetching Stripe products", {
       stripeUserId,
-      credentialId: credential.id,
-      userId: credential.userId,
-      teamId: credential.teamId,
+      credentialId: credential?.id,
+      userId: credential?.userId || session.user.id,
+      teamId: credential?.teamId,
+      isManuallyConfigured: !stripeUserId,
     });
 
     // Initialize Stripe with the platform's key
@@ -71,20 +83,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // Determine which account to use
-    const accountToQuery = shouldUsePlatformAccount ? undefined : stripeUserId;
-    const accountType = shouldUsePlatformAccount ? "platform" : "connected";
+    // If no stripeUserId (manual config), always use platform account
+    const accountToQuery = shouldUsePlatformAccount || !stripeUserId ? undefined : stripeUserId;
+    const accountType = shouldUsePlatformAccount || !stripeUserId ? "platform" : "connected";
 
     log.info("Account comparison", {
       platformAccountId,
       connectedAccountId: stripeUserId,
       queryingAccount: accountToQuery || platformAccountId,
       accountType,
-      isUsingConnectedAccount: !shouldUsePlatformAccount,
+      isUsingConnectedAccount: !shouldUsePlatformAccount && !!stripeUserId,
       areSameAccount: platformAccountId === stripeUserId,
+      isManuallyConfigured: !stripeUserId,
     });
 
     // Fetch products and prices from the appropriate account
-    const stripeOptions = shouldUsePlatformAccount ? {} : { stripeAccount: stripeUserId };
+    const stripeOptions = shouldUsePlatformAccount || !stripeUserId ? {} : { stripeAccount: stripeUserId };
 
     const [products, prices] = await Promise.all([
       stripe.products.list(
@@ -170,11 +184,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             isUsingConnectedAccount: !shouldUsePlatformAccount,
             areSameAccount: platformAccountId === stripeUserId,
           },
-          credential: {
-            id: credential.id,
-            userId: credential.userId,
-            teamId: credential.teamId,
-          },
+          credential: credential
+            ? {
+                id: credential.id,
+                userId: credential.userId,
+                teamId: credential.teamId,
+              }
+            : null,
+          isManuallyConfigured: !stripeUserId,
           results: {
             rawProductsCount: products.data.length,
             rawPricesCount: prices.data.length,

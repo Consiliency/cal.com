@@ -97,3 +97,7 @@ apps/auth
 !.yarn/sdks
 !.yarn/versions
 i18n.cache
+
+# Claude logs
+logs/
+.claude/hooks/utils/__pycache__/

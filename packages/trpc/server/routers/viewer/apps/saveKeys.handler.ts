@@ -55,4 +55,31 @@ export const saveKeysHandler = async ({ ctx, input }: SaveKeysOptions) => {
       ...(input.fromEnabled && { enabled: true }),
     },
   });
+
+  // For payment apps, also create/update a credential record if needed
+  if (appMetadata?.type === "stripe_payment" && input.fromEnabled) {
+    // Check if credential already exists
+    const existingCredential = await ctx.prisma.credential.findFirst({
+      where: {
+        userId: ctx.user.id,
+        type: "stripe_payment",
+      },
+    });
+
+    if (!existingCredential) {
+      // Create a basic credential for manual configuration
+      // Note: This won't have stripe_user_id since it's not OAuth
+      await ctx.prisma.credential.create({
+        data: {
+          type: "stripe_payment",
+          key: {
+            ...keys,
+            manual_config: true,
+          } as Prisma.InputJsonObject,
+          userId: ctx.user.id,
+          appId: input.slug,
+        },
+      });
+    }
+  }
 };
