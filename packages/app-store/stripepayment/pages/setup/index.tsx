@@ -12,6 +12,7 @@ export default function StripePaymentSetup() {
   const router = useRouter();
 
   // Check if Stripe is already connected via OAuth or manual config
+  const { data: appList } = trpc.viewer.apps.listLocal.useQuery({ category: "payment" });
   const { data: credentials } = trpc.viewer.apps.listLocal.useQuery({ category: "payment" });
   const stripeApp = credentials?.find((app) => app.slug === "stripe");
   const isOAuthConnected = stripeApp?.isInstalled || false;
@@ -21,6 +22,11 @@ export default function StripePaymentSetup() {
   const handleConnect = () => {
     // Use the Stripe OAuth URL from their app directory
     window.location.href = `${WEBAPP_URL}/api/integrations/stripe/add`;
+  };
+
+  const handleManualConfig = () => {
+    // Redirect to app settings page for manual configuration
+    router.push("/settings/platform/stripe");
   };
 
   return (
@@ -47,26 +53,53 @@ export default function StripePaymentSetup() {
               title={isManuallyConfigured ? t("stripe_configured") : t("stripe_connected")}
               className="mb-4"
             />
-            <Button
-              onClick={() => router.push("/event-types")}
-              className="w-full"
-              size="lg"
-              StartIcon="arrow-left">
-              {t("go_to_event_types")}
-            </Button>
+            <div className="space-y-3">
+              <Button
+                onClick={() => router.push("/event-types")}
+                className="w-full"
+                size="lg"
+                StartIcon="arrow-left">
+                {t("go_to_event_types")}
+              </Button>
+              {isManuallyConfigured && (
+                <Button
+                  onClick={handleManualConfig}
+                  className="w-full"
+                  size="lg"
+                  variant="secondary"
+                  StartIcon="settings">
+                  {t("update_stripe_settings")}
+                </Button>
+              )}
+            </div>
             {isManuallyConfigured && (
               <p className="mt-4 text-center text-xs text-gray-500">{t("stripe_manual_config_note")}</p>
             )}
           </>
         ) : (
           <>
-            <Button onClick={handleConnect} className="w-full" size="lg" StartIcon="credit-card">
-              {t("stripe_connect_atom_label")}
-            </Button>
-            <p className="mt-4 text-center text-xs text-gray-500">{t("stripe_redirect_notice")}</p>
-            <div className="mt-4 text-center">
-              <p className="text-xs text-gray-500">{t("stripe_manual_config_available")}</p>
+            <div className="space-y-3">
+              <Button onClick={handleConnect} className="w-full" size="lg" StartIcon="credit-card">
+                {t("stripe_connect_atom_label")}
+              </Button>
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center" aria-hidden="true">
+                  <div className="w-full border-t border-gray-300" />
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="bg-white px-2 text-gray-500 dark:bg-gray-800">{t("or")}</span>
+                </div>
+              </div>
+              <Button
+                onClick={handleManualConfig}
+                className="w-full"
+                size="lg"
+                variant="secondary"
+                StartIcon="settings">
+                {t("configure_manually")}
+              </Button>
             </div>
+            <p className="mt-4 text-center text-xs text-gray-500">{t("stripe_redirect_notice")}</p>
           </>
         )}
 

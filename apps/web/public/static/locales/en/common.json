@@ -2811,6 +2811,8 @@
   "stripe_manual_config_note": "Using platform account configuration",
   "stripe_redirect_notice": "You will be redirected to Stripe to authorize the connection",
   "stripe_manual_config_available": "Or configure manually in Admin Settings",
+  "update_stripe_settings": "Update Stripe Settings",
+  "configure_manually": "Configure Manually",
   "go_to_event_types": "Go to Event Types",
   "booking_question_response_variables": "Booking question response variables",
   "managed_by_teamAdmins": "Managed by {{teamAdmins}}",

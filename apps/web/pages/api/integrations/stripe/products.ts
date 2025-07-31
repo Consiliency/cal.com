@@ -57,6 +57,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // If no credential or credential without stripe_user_id, check if Stripe is configured via admin
+    let stripeApiKey: string | undefined;
+
     if (!credential || !stripeUserId) {
       const stripeApp = await prisma.app.findUnique({
         where: { slug: "stripe" },
@@ -69,8 +71,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           .json({ error: "Stripe not connected. Please connect via OAuth or configure in admin settings." });
       }
 
+      // Get the API key from app configuration
+      const appKeys = stripeApp.keys as { client_secret?: string };
+      if (!appKeys.client_secret) {
+        log.error("Stripe app keys missing client_secret");
+        return res.status(500).json({ error: "Stripe configuration is incomplete" });
+      }
+
+      stripeApiKey = appKeys.client_secret;
       isManuallyConfigured = true;
       log.info("Using platform account for manually configured Stripe app");
+    } else {
+      // Use environment variable for OAuth connections
+      stripeApiKey = process.env.STRIPE_PRIVATE_KEY;
+    }
+
+    if (!stripeApiKey) {
+      log.error("No Stripe API key available");
+      return res.status(500).json({ error: "Stripe API key not configured" });
     }
 
     log.info("Fetching Stripe products", {
@@ -81,8 +99,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       isManuallyConfigured,
     });
 
-    // Initialize Stripe with the platform's key
-    const stripe = new Stripe(process.env.STRIPE_PRIVATE_KEY || "", {
+    // Initialize Stripe with the appropriate key
+    const stripe = new Stripe(stripeApiKey, {
       apiVersion: "2025-06-30.basil" as const,
     });
 
