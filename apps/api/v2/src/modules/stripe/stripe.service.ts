@@ -86,12 +86,15 @@ export class StripeService {
 
     const { client_id, client_secret } = stripeKeysResponseSchema.parse(app?.keys);
 
-    if (!client_id) {
-      throw new NotFoundException("Stripe app not found");
+    // For OAuth flow, we need a valid OAuth client_id
+    if (!client_id || client_id === "") {
+      throw new BadRequestException(
+        "Stripe OAuth not configured. OAuth client_id is required for Stripe Connect."
+      );
     }
 
     if (!client_secret) {
-      throw new NotFoundException("Stripe app not found");
+      throw new BadRequestException("Stripe secret key not found");
     }
 
     return { client_id, client_secret };
