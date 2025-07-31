@@ -61,7 +61,7 @@ export default function StripePaymentSetup() {
         ) : (
           <>
             <Button onClick={handleConnect} className="w-full" size="lg" StartIcon="credit-card">
-              {t("connect_with_stripe")}
+              {t("stripe_connect_atom_label")}
             </Button>
             <p className="mt-4 text-center text-xs text-gray-500">{t("stripe_redirect_notice")}</p>
             <div className="mt-4 text-center">
