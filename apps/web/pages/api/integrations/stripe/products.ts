@@ -42,7 +42,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     let isManuallyConfigured = false;
 
     if (credential && credential.key) {
-      const credentialKey = credential.key as any;
+      const credentialKey = credential.key as {
+        stripe_user_id?: string;
+        manual_config?: boolean;
+        client_secret?: string;
+      };
       stripeUserId = credentialKey.stripe_user_id;
 
       // Check if this is a manually configured credential (no stripe_user_id)

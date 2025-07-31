@@ -211,6 +211,46 @@ const EditKeysModal: FC<{
     },
   });
 
+  // Helper function to get user-friendly labels for app keys
+  const getKeyLabel = (key: string, appSlug: string) => {
+    // Special labels for Stripe platform account keys
+    if (appSlug === "stripe") {
+      switch (key) {
+        case "client_id":
+          return "OAuth Client ID (optional - only for Connect apps)";
+        case "client_secret":
+          return "Stripe Secret Key (sk_...)";
+        case "public_key":
+          return "Stripe Publishable Key (pk_...)";
+        case "webhook_secret":
+          return "Webhook Signing Secret (whsec_...)";
+        default:
+          return key;
+      }
+    }
+    // Default to the key name for other apps
+    return key;
+  };
+
+  // Helper function to get helper text for app keys
+  const getKeyHelperText = (key: string, appSlug: string) => {
+    if (appSlug === "stripe") {
+      switch (key) {
+        case "client_id":
+          return "Leave empty for platform account. Only needed for Stripe Connect OAuth.";
+        case "client_secret":
+          return "Your Stripe secret key from the API keys section";
+        case "public_key":
+          return "Your Stripe publishable key from the API keys section";
+        case "webhook_secret":
+          return "Signing secret from your webhook endpoint settings";
+        default:
+          return undefined;
+      }
+    }
+    return undefined;
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={handleModelClose}>
       <DialogContent title={t("edit_keys")} type="creation">
@@ -236,10 +276,11 @@ const EditKeysModal: FC<{
                 defaultValue={keys && keys[key] ? keys?.[key] : ""}
                 render={({ field: { value } }) => (
                   <TextField
-                    label={key}
+                    label={getKeyLabel(key, slug)}
                     key={key}
                     name={key}
                     value={value}
+                    hint={getKeyHelperText(key, slug)}
                     onChange={(e) => {
                       formMethods.setValue(key, e?.target.value || "");
                     }}
