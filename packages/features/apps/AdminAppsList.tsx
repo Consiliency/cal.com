@@ -189,10 +189,15 @@ const EditKeysModal: FC<{
   const utils = trpc.useUtils();
   const { t } = useLocale();
   const { dirName, slug, type, isOpen, keys, handleModelClose, fromEnabled, appName } = props;
-  const appKeySchema = appKeysSchemas[dirName as keyof typeof appKeysSchemas];
+  // Use slug for schema lookup as the generated schemas use appId (slug) as key
+  const appKeySchema = appKeysSchemas[slug as keyof typeof appKeysSchemas];
+
+  if (!appKeySchema) {
+    console.error(`No key schema found for app: ${slug}`);
+  }
 
   const formMethods = useForm({
-    resolver: zodResolver(appKeySchema),
+    resolver: appKeySchema ? zodResolver(appKeySchema) : undefined,
   });
 
   const saveKeysMutation = trpc.viewer.apps.saveKeys.useMutation({
@@ -236,7 +241,7 @@ const EditKeysModal: FC<{
                     name={key}
                     value={value}
                     onChange={(e) => {
-                      formMethods.setValue(key, e?.target.value);
+                      formMethods.setValue(key, e?.target.value || "");
                     }}
                   />
                 )}
