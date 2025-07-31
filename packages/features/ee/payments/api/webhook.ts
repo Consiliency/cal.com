@@ -133,11 +133,103 @@ const handleSetupSuccess = async (event: Stripe.Event) => {
   }
 };
 
+const handlePaymentFailed = async (event: Stripe.Event) => {
+  const paymentIntent = event.data.object as Stripe.PaymentIntent;
+  const payment = await prisma.payment.findFirst({
+    where: {
+      externalId: paymentIntent.id,
+    },
+    select: {
+      id: true,
+      bookingId: true,
+      paymentOption: true,
+    },
+  });
+
+  if (!payment?.bookingId) {
+    log.info("Payment not found for failed payment intent", { paymentIntentId: paymentIntent.id });
+    return;
+  }
+
+  // Only auto-cancel for SYNC_BOOKING payments
+  if (payment.paymentOption !== "SYNC_BOOKING") {
+    log.info("Payment failed but not SYNC_BOOKING, skipping auto-cancellation", {
+      paymentId: payment.id,
+      paymentOption: payment.paymentOption,
+    });
+    return;
+  }
+
+  // Cancel the booking
+  await prisma.booking.update({
+    where: {
+      id: payment.bookingId,
+    },
+    data: {
+      status: BookingStatus.CANCELLED,
+      cancellationReason: "Payment failed",
+    },
+  });
+
+  log.info("Cancelled booking due to payment failure", {
+    bookingId: payment.bookingId,
+    paymentId: payment.id,
+  });
+};
+
+const handleCheckoutSessionExpired = async (event: Stripe.Event) => {
+  const session = event.data.object as Stripe.Checkout.Session;
+
+  // For checkout sessions, we need to find the payment by the session ID
+  const payment = await prisma.payment.findFirst({
+    where: {
+      OR: [{ externalId: session.id }, { data: { path: ["sessionId"], equals: session.id } }],
+    },
+    select: {
+      id: true,
+      bookingId: true,
+      paymentOption: true,
+    },
+  });
+
+  if (!payment?.bookingId) {
+    log.info("Payment not found for expired checkout session", { sessionId: session.id });
+    return;
+  }
+
+  // Only auto-cancel for SYNC_BOOKING payments
+  if (payment.paymentOption !== "SYNC_BOOKING") {
+    log.info("Checkout session expired but not SYNC_BOOKING, skipping auto-cancellation", {
+      paymentId: payment.id,
+      paymentOption: payment.paymentOption,
+    });
+    return;
+  }
+
+  // Cancel the booking
+  await prisma.booking.update({
+    where: {
+      id: payment.bookingId,
+    },
+    data: {
+      status: BookingStatus.CANCELLED,
+      cancellationReason: "Payment session expired",
+    },
+  });
+
+  log.info("Cancelled booking due to checkout session expiration", {
+    bookingId: payment.bookingId,
+    paymentId: payment.id,
+  });
+};
+
 type WebhookHandler = (event: Stripe.Event) => Promise<void>;
 
 const webhookHandlers: Record<string, WebhookHandler | undefined> = {
   "payment_intent.succeeded": handleStripePaymentSuccess,
   "setup_intent.succeeded": handleSetupSuccess,
+  "payment_intent.payment_failed": handlePaymentFailed,
+  "checkout.session.expired": handleCheckoutSessionExpired,
 };
 
 /**
