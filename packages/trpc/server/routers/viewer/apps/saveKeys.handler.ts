@@ -51,7 +51,7 @@ export const saveKeysHandler = async ({ ctx, input }: SaveKeysOptions) => {
         (appMetadata?.categories as AppCategories[]) ||
         ([appMetadata?.category] as AppCategories[]) ||
         undefined,
-      keys: (input.keys as Prisma.InputJsonObject) || undefined,
+      keys: (keys as Prisma.InputJsonObject) || undefined,
       ...(input.fromEnabled && { enabled: true }),
     },
   });

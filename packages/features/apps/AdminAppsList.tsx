@@ -50,18 +50,23 @@ const IntegrationContainer = ({
   const [disableDialog, setDisableDialog] = useState(false);
 
   const showKeyModal = (fromEnabled?: boolean) => {
-    // FIXME: This is preventing the modal from opening for apps that has null keys
-    if (app.keys) {
-      handleModelOpen({
-        dirName: app.dirName,
-        keys: app.keys,
-        slug: app.slug,
-        type: app.type,
-        isOpen: "editKeys",
-        fromEnabled,
-        appName: app.name,
-      });
-    }
+    // Initialize empty keys for apps that don't have keys yet (like new Stripe installations)
+    const keysToEdit = app.keys || {
+      client_id: "",
+      client_secret: "",
+      public_key: "",
+      webhook_secret: "",
+    };
+
+    handleModelOpen({
+      dirName: app.dirName,
+      keys: keysToEdit,
+      slug: app.slug,
+      type: app.type,
+      isOpen: "editKeys",
+      fromEnabled,
+      appName: app.name,
+    });
   };
 
   const enableAppMutation = trpc.viewer.apps.toggle.useMutation({
