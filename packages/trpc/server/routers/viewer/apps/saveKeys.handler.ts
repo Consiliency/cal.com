@@ -20,7 +20,16 @@ type SaveKeysOptions = {
 };
 
 export const saveKeysHandler = async ({ ctx, input }: SaveKeysOptions) => {
-  const keysSchema = appKeysSchemas[input.dirName as keyof typeof appKeysSchemas];
+  // Use slug for schema lookup as the generated schemas use appId (slug) as key
+  const keysSchema = appKeysSchemas[input.slug as keyof typeof appKeysSchemas];
+
+  if (!keysSchema) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: `No key schema found for app: ${input.slug}`,
+    });
+  }
+
   const keys = keysSchema.parse(input.keys);
 
   // Get app name from metadata
