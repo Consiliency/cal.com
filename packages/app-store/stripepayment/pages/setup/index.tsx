@@ -12,10 +12,12 @@ export default function StripePaymentSetup() {
   const { t } = useLocale();
   const router = useRouter();
 
-  // Check if Stripe is already connected
+  // Check if Stripe is already connected via OAuth or manual config
   const { data: credentials } = trpc.viewer.apps.listLocal.useQuery({ category: "payment" });
   const stripeApp = credentials?.find((app) => app.slug === "stripe");
-  const isConnected = stripeApp?.isInstalled || false;
+  const isOAuthConnected = stripeApp?.isInstalled || false;
+  const isManuallyConfigured = stripeApp?.enabled && stripeApp?.keys && !isOAuthConnected;
+  const isConfigured = isOAuthConnected || isManuallyConfigured;
 
   const handleConnect = () => {
     // Use the Stripe OAuth URL from their app directory
@@ -30,16 +32,24 @@ export default function StripePaymentSetup() {
           <div className="mb-6 text-center">
             <Icon name="credit-card" className="mx-auto mb-4 h-12 w-12 text-blue-600" />
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-              {isConnected ? t("stripe_already_connected") : t("connect_stripe_account")}
+              {isConfigured ? t("stripe_already_connected") : t("connect_stripe_account")}
             </h2>
             <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-              {isConnected ? t("stripe_connection_active") : t("connect_stripe_to_accept_payments")}
+              {isManuallyConfigured
+                ? t("stripe_configured_manually")
+                : isOAuthConnected
+                ? t("stripe_connection_active")
+                : t("connect_stripe_to_accept_payments")}
             </p>
           </div>
 
-          {isConnected ? (
+          {isConfigured ? (
             <>
-              <Alert severity="success" title={t("stripe_connected")} className="mb-4" />
+              <Alert
+                severity="success"
+                title={isManuallyConfigured ? t("stripe_configured") : t("stripe_connected")}
+                className="mb-4"
+              />
               <Button
                 onClick={() => router.push("/event-types")}
                 className="w-full"
@@ -47,6 +57,9 @@ export default function StripePaymentSetup() {
                 StartIcon="arrow-left">
                 {t("go_to_event_types")}
               </Button>
+              {isManuallyConfigured && (
+                <p className="mt-4 text-center text-xs text-gray-500">{t("stripe_manual_config_note")}</p>
+              )}
             </>
           ) : (
             <>
@@ -54,6 +67,9 @@ export default function StripePaymentSetup() {
                 {t("connect_with_stripe")}
               </Button>
               <p className="mt-4 text-center text-xs text-gray-500">{t("stripe_redirect_notice")}</p>
+              <div className="mt-4 text-center">
+                <p className="text-xs text-gray-500">{t("stripe_manual_config_available")}</p>
+              </div>
             </>
           )}
 

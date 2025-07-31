@@ -27,8 +27,12 @@ export const appDataSchema = eventTypeAppCardZod.merge(
 );
 
 export const appKeysSchema = z.object({
-  client_id: z.string().startsWith("ca_").min(1),
+  // OAuth Client ID - only required for Stripe Connect apps, not for platform accounts
+  client_id: z.string().startsWith("ca_").min(1).optional(),
+  // Secret key (despite the name, this is your Stripe secret key)
   client_secret: z.string().startsWith("sk_").min(1),
+  // Publishable key
   public_key: z.string().startsWith("pk_").min(1),
+  // Webhook signing secret
   webhook_secret: z.string().startsWith("whsec_").min(1),
 });

@@ -13,7 +13,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   const session = await getSession({ req });
-  if (!session?.user?.id) {
+  const userId = session?.user && "id" in session.user ? session.user.id : null;
+  if (!userId) {
     return res.status(401).json({ error: "Unauthorized" });
   }
 
@@ -32,40 +33,48 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             type: "stripe_payment",
           }
         : {
-            userId: session.user.id,
+            userId,
             type: "stripe_payment",
           },
     });
 
     let stripeUserId: string | undefined;
+    let isManuallyConfigured = false;
 
     if (credential && credential.key) {
       const credentialKey = credential.key as any;
       stripeUserId = credentialKey.stripe_user_id;
-    } else {
-      // If no credential found, check if Stripe is configured via admin interface
+
+      // Check if this is a manually configured credential (no stripe_user_id)
+      if (!stripeUserId && (credentialKey.manual_config || credentialKey.client_secret)) {
+        isManuallyConfigured = true;
+        log.info("Found manually configured Stripe credential");
+      }
+    }
+
+    // If no credential or credential without stripe_user_id, check if Stripe is configured via admin
+    if (!credential || !stripeUserId) {
       const stripeApp = await prisma.app.findUnique({
         where: { slug: "stripe" },
       });
 
       if (!stripeApp || !stripeApp.keys || !stripeApp.enabled) {
-        log.error("Stripe not configured", { credentialId, userId: session.user.id });
+        log.error("Stripe not configured", { credentialId, userId });
         return res
           .status(404)
           .json({ error: "Stripe not connected. Please connect via OAuth or configure in admin settings." });
       }
 
-      // For manually configured apps, we don't have a connected account
-      // Products should be created on the platform account
+      isManuallyConfigured = true;
       log.info("Using platform account for manually configured Stripe app");
     }
 
     log.info("Fetching Stripe products", {
       stripeUserId,
       credentialId: credential?.id,
-      userId: credential?.userId || session.user.id,
+      userId: credential?.userId || userId,
       teamId: credential?.teamId,
-      isManuallyConfigured: !stripeUserId,
+      isManuallyConfigured,
     });
 
     // Initialize Stripe with the platform's key
