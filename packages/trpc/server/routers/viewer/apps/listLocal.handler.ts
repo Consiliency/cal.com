@@ -61,7 +61,8 @@ export const listLocalHandler = async ({ ctx, input }: ListLocalOptions) => {
       };
     }
 
-    const keysSchema = appKeysSchemas[app.dirName as keyof typeof appKeysSchemas];
+    // Use slug for schema lookup as the generated schemas use appId (slug) as key
+    const keysSchema = appKeysSchemas[app.slug as keyof typeof appKeysSchemas];
 
     const keys: Record<string, string> = {};
 
