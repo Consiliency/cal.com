@@ -94,14 +94,19 @@ const EventTypeAppSettingsInterface: EventTypeAppSettingsComponent = ({
     setLoadingProducts(true);
     setProductError(null);
     try {
-      // Get the credentialId from app data if available
-      const credentialId = getAppData("credentialId");
       const params = new URLSearchParams();
 
-      // Only append credentialId if it exists and is not undefined
-      // This allows manual configurations to work without credentials
-      if (credentialId && credentialId !== undefined) {
-        params.append("credentialId", credentialId.toString());
+      // Only get and append credentialId if NOT using platform account
+      // When using platform account or manual configuration, we don't need credentialId
+      if (!usePlatformAccount) {
+        const credentialId = getAppData("credentialId");
+        // Only append if it exists and is not undefined
+        if (credentialId && credentialId !== undefined) {
+          params.append("credentialId", credentialId.toString());
+        }
+      } else {
+        // When using platform account, ensure we don't send credentialId
+        console.log("Using platform account - skipping credentialId");
       }
 
       // Add debug flag to get more info
@@ -156,7 +161,15 @@ const EventTypeAppSettingsInterface: EventTypeAppSettingsComponent = ({
       }
       // Fetch products when payment is enabled and pricing mode is stripe_product
       if (pricingMode === "stripe_product") {
-        fetchStripeProducts();
+        // Check if we have a stored credentialId that might be invalid
+        const storedCredentialId = getAppData("credentialId");
+        if (storedCredentialId) {
+          console.log("Found credentialId on initial load, using platform account mode");
+          // Use platform account mode to bypass invalid credentialId
+          fetchStripeProducts(true);
+        } else {
+          fetchStripeProducts();
+        }
       }
     }
 
