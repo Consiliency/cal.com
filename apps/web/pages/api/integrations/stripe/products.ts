@@ -133,7 +133,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Initialize Stripe with the appropriate key
     const stripe = new Stripe(stripeApiKey, {
-      apiVersion: "2025-06-30.basil" as const,
+      apiVersion: "2020-08-27",
     });
 
     // Get platform account info
@@ -163,15 +163,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Fetch products and prices from the appropriate account
     const stripeOptions = shouldUsePlatformAccount || !stripeUserId ? {} : { stripeAccount: stripeUserId };
 
-    const [products, prices] = await Promise.all([
-      stripe.products.list(
-        {
-          active: true,
-          limit: 100,
-        },
-        stripeOptions
-      ),
-      stripe.prices.list(
+    let products, prices;
+    try {
+      [products, prices] = await Promise.all([
+        stripe.products.list(
+          {
+            active: true,
+            limit: 100,
+          },
+          stripeOptions
+        ),
+        stripe.prices.list(
         {
           active: true,
           limit: 100,
@@ -180,6 +182,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         stripeOptions
       ),
     ]);
+    } catch (stripeError: any) {
+      log.error("Stripe API error", {
+        error: stripeError.message,
+        type: stripeError.type,
+        code: stripeError.code,
+        statusCode: stripeError.statusCode,
+        requestId: stripeError.requestId,
+      });
+      return res.status(500).json({ 
+        error: "Failed to fetch products",
+        details: isDebug ? {
+          message: stripeError.message,
+          type: stripeError.type,
+          code: stripeError.code,
+        } : undefined
+      });
+    }
 
     log.info("Stripe API results", {
       productsCount: products.data.length,
