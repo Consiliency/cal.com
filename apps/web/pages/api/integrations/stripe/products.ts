@@ -178,27 +178,44 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
 
     // Fetch products and prices from the appropriate account
-    const stripeOptions = shouldUsePlatformAccount || !stripeUserId ? {} : { stripeAccount: stripeUserId };
+    // When using a connected account, pass stripeAccount as the second parameter
+    const stripeAccountOptions = shouldUsePlatformAccount || !stripeUserId ? undefined : { stripeAccount: stripeUserId };
 
     let products, prices;
     try {
-      [products, prices] = await Promise.all([
-        stripe.products.list(
-          {
+      if (stripeAccountOptions) {
+        // For connected accounts, pass options as second parameter
+        [products, prices] = await Promise.all([
+          stripe.products.list(
+            {
+              active: true,
+              limit: 100,
+            },
+            stripeAccountOptions
+          ),
+          stripe.prices.list(
+            {
+              active: true,
+              limit: 100,
+              expand: ["data.product"],
+            },
+            stripeAccountOptions
+          ),
+        ]);
+      } else {
+        // For platform account, just pass the parameters
+        [products, prices] = await Promise.all([
+          stripe.products.list({
             active: true,
             limit: 100,
-          },
-          stripeOptions
-        ),
-        stripe.prices.list(
-        {
-          active: true,
-          limit: 100,
-          expand: ["data.product"],
-        },
-        stripeOptions
-      ),
-    ]);
+          }),
+          stripe.prices.list({
+            active: true,
+            limit: 100,
+            expand: ["data.product"],
+          }),
+        ]);
+      }
     } catch (stripeError: any) {
       log.error("Stripe API error", {
         error: stripeError.message,
