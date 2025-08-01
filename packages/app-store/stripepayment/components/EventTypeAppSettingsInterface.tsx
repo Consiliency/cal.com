@@ -91,6 +91,10 @@ const EventTypeAppSettingsInterface: EventTypeAppSettingsComponent = ({
 
   // Fetch Stripe products
   const fetchStripeProducts = async (usePlatformAccount = false) => {
+    // Debug: Check if cookies are accessible
+    if (typeof document !== "undefined") {
+      console.log("Document cookies available:", document.cookie.length > 0 ? "Yes" : "No");
+    }
     setLoadingProducts(true);
     setProductError(null);
     try {
@@ -117,14 +121,21 @@ const EventTypeAppSettingsInterface: EventTypeAppSettingsComponent = ({
         params.append("usePlatformAccount", "true");
       }
 
-      const response = await fetch(
-        `/api/integrations/stripe/products${params.toString() ? `?${params.toString()}` : ""}`,
-        {
-          credentials: "include",
-        }
-      );
+      const url = `/api/integrations/stripe/products${params.toString() ? `?${params.toString()}` : ""}`;
+      console.log("Fetching Stripe products from:", url);
+      
+      const response = await fetch(url, {
+        method: "GET",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      
       if (!response.ok) {
+        console.error("Stripe products fetch failed:", response.status, response.statusText);
         const error = await response.json();
+        console.error("Error details:", error);
         throw new Error(error.error || "Failed to fetch products");
       }
       const data = await response.json();
