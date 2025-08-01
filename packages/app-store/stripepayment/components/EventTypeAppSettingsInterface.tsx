@@ -125,11 +125,7 @@ const EventTypeAppSettingsInterface: EventTypeAppSettingsComponent = ({
       console.log("Fetching Stripe products from:", url);
       
       const response = await fetch(url, {
-        method: "GET",
         credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
       });
       
       if (!response.ok) {
