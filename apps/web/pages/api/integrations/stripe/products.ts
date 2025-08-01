@@ -129,12 +129,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       userId: credential?.userId || userId,
       teamId: credential?.teamId,
       isManuallyConfigured,
+      apiKeyLength: stripeApiKey?.length,
+      apiKeyPrefix: stripeApiKey?.substring(0, 7) + "...",
     });
 
     // Initialize Stripe with the appropriate key
-    const stripe = new Stripe(stripeApiKey, {
-      apiVersion: "2020-08-27",
-    });
+    let stripe: Stripe;
+    try {
+      stripe = new Stripe(stripeApiKey, {
+        apiVersion: "2025-06-30.basil" as const,
+      });
+      log.info("Stripe client initialized successfully");
+    } catch (initError: any) {
+      log.error("Failed to initialize Stripe client", {
+        error: initError.message,
+        stack: initError.stack,
+      });
+      return res.status(500).json({ 
+        error: "Failed to initialize Stripe client",
+        details: isDebug ? {
+          message: initError.message,
+        } : undefined
+      });
+    }
 
     // Get platform account info
     let platformAccountId = "unknown";
@@ -189,13 +206,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         code: stripeError.code,
         statusCode: stripeError.statusCode,
         requestId: stripeError.requestId,
+        stack: stripeError.stack,
+        raw: stripeError.raw,
       });
+      
+      // Check if it's an API version error
+      if (stripeError.message?.includes('API version')) {
+        log.error("API Version mismatch detected", {
+          providedVersion: "2025-06-30.basil",
+          errorMessage: stripeError.message,
+        });
+      }
+      
       return res.status(500).json({ 
         error: "Failed to fetch products",
         details: isDebug ? {
           message: stripeError.message,
           type: stripeError.type,
           code: stripeError.code,
+          statusCode: stripeError.statusCode,
         } : undefined
       });
     }
