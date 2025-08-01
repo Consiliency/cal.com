@@ -57,8 +57,8 @@ module.exports = {
   overrides: [
     {
       files: ["*.ts", "*.tsx"],
-      extends: ["plugin:@typescript-eslint/recommended", "plugin:@calcom/eslint/recommended"],
-      plugins: ["@typescript-eslint", "@calcom/eslint"],
+      extends: ["plugin:@typescript-eslint/recommended"],
+      plugins: ["@typescript-eslint"],
       parser: "@typescript-eslint/parser",
       rules: {
         "@typescript-eslint/consistent-type-imports": [
@@ -84,7 +84,7 @@ module.exports = {
           files: ["apps/website/**/*.{tsx,ts}"],
           rules: {
             /** TODO: Remove once website router is migrated  */
-            "@calcom/eslint-plugin-eslint/deprecated-imports-next-router": "off",
+            // Temporarily disabled: "@calcom/eslint-plugin-eslint/deprecated-imports-next-router": "off",
           },
         },
       ],

@@ -12,6 +12,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const { client_id } = await getStripeAppKeys();
 
   if (req.method === "GET") {
+    // If no client_id is configured, we can't proceed with OAuth
+    if (!client_id) {
+      return res.status(400).json({ error: "Stripe OAuth is not configured" });
+    }
     // Get user
     const user = await prisma.user.findUnique({
       where: {
