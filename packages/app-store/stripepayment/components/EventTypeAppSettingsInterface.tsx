@@ -118,7 +118,10 @@ const EventTypeAppSettingsInterface: EventTypeAppSettingsComponent = ({
       }
 
       const response = await fetch(
-        `/api/integrations/stripe/products${params.toString() ? `?${params.toString()}` : ""}`
+        `/api/integrations/stripe/products${params.toString() ? `?${params.toString()}` : ""}`,
+        {
+          credentials: "include",
+        }
       );
       if (!response.ok) {
         const error = await response.json();
