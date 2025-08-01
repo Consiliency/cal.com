@@ -27,7 +27,6 @@ const rule = createRule({
     fixable: "code",
     docs: {
       description: "Avoid deprecated imports",
-      recommended: "warn",
     },
     messages: {
       "dayjs-moved": `Import dayjs from '@calcom/daysjs' to avoid plugin conflicts.`,

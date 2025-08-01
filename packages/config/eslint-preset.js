@@ -84,7 +84,8 @@ module.exports = {
           files: ["apps/website/**/*.{tsx,ts}"],
           rules: {
             /** TODO: Remove once website router is migrated  */
-            // Temporarily disabled: "@calcom/eslint-plugin-eslint/deprecated-imports-next-router": "off",
+            // TODO: Re-enable once eslint plugin is updated for compatibility
+            // "@calcom/eslint-plugin-eslint/deprecated-imports-next-router": "off",
           },
         },
       ],
