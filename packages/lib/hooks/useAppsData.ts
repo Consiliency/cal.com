@@ -40,14 +40,23 @@ const useAppsData = () => {
       // Always get latest data available in Form because consequent calls to setData would update the Form but not allAppsData(it would update during next render)
       const allAppsDataFromForm = formMethods.getValues("metadata")?.apps || {};
       const appData = allAppsDataFromForm[appId];
+
+      // Build the updated app data
+      const updatedAppData: any = {
+        ...appData,
+        [key]: value,
+        appCategories,
+      };
+
+      // Only include credentialId if it's provided and not undefined
+      // This allows manual configurations to work without credentials
+      if (credentialId !== undefined) {
+        updatedAppData.credentialId = credentialId;
+      }
+
       setAllAppsData({
         ...allAppsDataFromForm,
-        [appId]: {
-          ...appData,
-          [key]: value,
-          credentialId,
-          appCategories,
-        },
+        [appId]: updatedAppData,
       });
     };
   };

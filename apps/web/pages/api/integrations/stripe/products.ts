@@ -69,39 +69,44 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     }
 
-    // If no credential or credential without stripe_user_id, check if Stripe is configured via admin
+    // First check if Stripe is configured via admin (manual configuration)
+    // This takes precedence over OAuth credentials to handle cases where
+    // credentialId is passed but doesn't exist or is invalid
+    const stripeApp = await prisma.app.findUnique({
+      where: { slug: "stripe" },
+    });
+
     let stripeApiKey: string | undefined;
 
-    if (!credential || !stripeUserId) {
-      const stripeApp = await prisma.app.findUnique({
-        where: { slug: "stripe" },
-      });
-
-      if (!stripeApp || !stripeApp.keys || !stripeApp.enabled) {
-        log.error("Stripe not configured", { credentialId, userId });
-        return res
-          .status(404)
-          .json({ error: "Stripe not connected. Please connect via OAuth or configure in admin settings." });
-      }
-
-      // Get the API key from app configuration
+    // If we have app keys configured, use them (manual configuration)
+    if (stripeApp?.keys && stripeApp.enabled) {
       const appKeys = stripeApp.keys as { client_secret?: string };
-      if (!appKeys.client_secret) {
-        log.error("Stripe app keys missing client_secret");
-        return res.status(500).json({ error: "Stripe configuration is incomplete" });
+      if (appKeys.client_secret) {
+        stripeApiKey = appKeys.client_secret;
+        isManuallyConfigured = true;
+        log.info("Using manually configured Stripe app keys");
       }
-
-      stripeApiKey = appKeys.client_secret;
-      isManuallyConfigured = true;
-      log.info("Using platform account for manually configured Stripe app");
-    } else {
-      // Use environment variable for OAuth connections
-      stripeApiKey = process.env.STRIPE_PRIVATE_KEY;
     }
 
+    // If no manual configuration, check for OAuth credentials
+    if (!stripeApiKey && credential && stripeUserId) {
+      // Use environment variable for OAuth connections
+      stripeApiKey = process.env.STRIPE_PRIVATE_KEY;
+      log.info("Using OAuth Stripe connection");
+    }
+
+    // If still no API key, we can't proceed
     if (!stripeApiKey) {
-      log.error("No Stripe API key available");
-      return res.status(500).json({ error: "Stripe API key not configured" });
+      log.error("No Stripe configuration found", {
+        hasAppKeys: !!stripeApp?.keys,
+        hasCredential: !!credential,
+        hasStripeUserId: !!stripeUserId,
+        credentialId,
+        userId,
+      });
+      return res
+        .status(404)
+        .json({ error: "Stripe not connected. Please connect via OAuth or configure in admin settings." });
     }
 
     log.info("Fetching Stripe products", {

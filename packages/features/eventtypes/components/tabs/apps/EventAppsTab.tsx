@@ -134,14 +134,18 @@ export const EventAppsTab = ({ eventType }: { eventType: EventType }) => {
           ) : null}
           {cardsForAppsWithTeams.map((apps) => apps.map((cards) => cards))}
           {installedApps.map((app) => {
-            if (!app.teams.length)
+            if (!app.teams.length) {
+              // Check if this is a manually configured app (e.g., Stripe with platform keys)
+              // Don't pass credentialId for manual configs - let the app handle it
+              const isManualConfig = app.slug === "stripe" && app.userCredentialIds.length === 0;
+
               return (
                 <EventTypeAppCard
                   getAppData={getAppDataGetter(app.slug as EventTypeAppsList)}
                   setAppData={getAppDataSetter(
                     app.slug as EventTypeAppsList,
                     app.categories,
-                    app.userCredentialIds[0]
+                    isManualConfig ? undefined : app.userCredentialIds[0]
                   )}
                   key={app.slug}
                   app={app}
@@ -149,6 +153,7 @@ export const EventAppsTab = ({ eventType }: { eventType: EventType }) => {
                   eventTypeFormMetadata={eventTypeFormMetadata}
                 />
               );
+            }
           })}
         </div>
       </div>

@@ -49,6 +49,7 @@ const EventTypeAppSettingsInterface: EventTypeAppSettingsComponent = ({
       value: currencyOptions[0].value,
     }
   );
+
   const paymentOption = getAppData("paymentOption");
   const paymentOptionSelectValue = paymentOptions.find((option) => paymentOption === option.value);
   const requirePayment = getAppData("enabled");
