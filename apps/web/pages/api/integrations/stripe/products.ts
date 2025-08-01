@@ -79,12 +79,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     let stripeApiKey: string | undefined;
 
     // If we have app keys configured, use them (manual configuration)
+    // This ALWAYS takes precedence - we ignore any credentialId when manual config exists
     if (stripeApp?.keys && stripeApp.enabled) {
       const appKeys = stripeApp.keys as { client_secret?: string };
       if (appKeys.client_secret) {
         stripeApiKey = appKeys.client_secret;
         isManuallyConfigured = true;
-        log.info("Using manually configured Stripe app keys");
+
+        // Log that we're ignoring credentialId if one was passed
+        if (credentialId) {
+          log.info("Ignoring credentialId parameter - using manually configured Stripe app keys", {
+            credentialId,
+            reason: "Manual configuration takes precedence",
+          });
+        } else {
+          log.info("Using manually configured Stripe app keys");
+        }
+
+        // Reset credential-related variables since we're using manual config
+        credential = null;
+        stripeUserId = undefined;
       }
     }
 

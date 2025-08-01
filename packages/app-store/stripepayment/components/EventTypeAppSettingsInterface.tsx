@@ -50,6 +50,17 @@ const EventTypeAppSettingsInterface: EventTypeAppSettingsComponent = ({
     }
   );
 
+  // Check and clear invalid credentialId on mount
+  // This handles cases where credentialId is stored but the credential doesn't exist
+  useEffect(() => {
+    const storedCredentialId = getAppData("credentialId");
+    if (storedCredentialId) {
+      console.log("Found stored credentialId, clearing it for manual configuration:", storedCredentialId);
+      // Clear the invalid credentialId to allow manual configuration to work
+      setAppData("credentialId", undefined);
+    }
+  }, []); // Run only on mount
+
   const paymentOption = getAppData("paymentOption");
   const paymentOptionSelectValue = paymentOptions.find((option) => paymentOption === option.value);
   const requirePayment = getAppData("enabled");
