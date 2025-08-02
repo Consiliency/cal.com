@@ -256,3 +256,8 @@ yarn clean
 # Check for circular dependencies
 yarn workspace @calcom/web analyze
 ```
+
+## Workflow Guidelines
+
+### Development Restrictions
+- Never make changes inside of the @.claude/hooks directory

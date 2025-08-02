@@ -43,17 +43,33 @@ const handleSeats = async (newSeatedBookingObject: NewSeatedBookingObject) => {
 
   const seatedBooking: SeatedBooking | null = await prisma.booking.findFirst({
     where: {
-      OR: [
+      AND: [
         {
-          uid: rescheduleUid || reqBookingUid,
+          OR: [
+            {
+              uid: rescheduleUid || reqBookingUid,
+            },
+            {
+              eventTypeId: eventType.id,
+              startTime: new Date(evt.startTime),
+            },
+          ],
         },
-
         {
-          eventTypeId: eventType.id,
-          startTime: new Date(evt.startTime),
+          status: BookingStatus.ACCEPTED,
         },
-      ],
-      status: BookingStatus.ACCEPTED,
+        {
+          // Only find bookings that are either paid or don't require payment
+          OR: [
+            { paid: true },
+            { 
+              payment: {
+                none: {} // No payment record means payment wasn't required
+              }
+            }
+          ]
+        }
+      ]
     },
     select: {
       uid: true,
@@ -66,6 +82,13 @@ const handleSeats = async (newSeatedBookingObject: NewSeatedBookingObject) => {
       status: true,
       smsReminderNumber: true,
       endTime: true,
+      paid: true,
+      payment: {
+        select: {
+          id: true,
+          success: true
+        }
+      }
     },
   });
 

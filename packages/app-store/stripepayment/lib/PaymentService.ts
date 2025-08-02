@@ -76,6 +76,18 @@ export class PaymentService implements IAbstractPaymentService {
     bookingTitle?: string
   ) {
     try {
+      log.info("PaymentService.create called", {
+        bookingId,
+        userId,
+        amount: payment.amount,
+        currency: payment.currency,
+        paymentOption,
+        hasCredentials: !!this.credentials,
+        hasStripeUserId: !!this.credentials?.stripe_user_id,
+        hasPlatformSecretKey: !!this.credentials?.platform_secret_key,
+        bookerEmail,
+      });
+
       // Ensure that the payment service can support the passed payment option
       const parsedOption = paymentOptionEnum.parse(paymentOption);
       if (parsedOption !== "ON_BOOKING" && parsedOption !== "SYNC_BOOKING") {
@@ -86,12 +98,31 @@ export class PaymentService implements IAbstractPaymentService {
         throw new Error("Stripe credentials not found");
       }
 
+      // Log Stripe configuration
+      log.info("Stripe configuration", {
+        hasStripeUserId: !!this.credentials.stripe_user_id,
+        hasPlatformSecretKey: !!this.credentials.platform_secret_key,
+        hasPublishableKey: !!this.credentials.stripe_publishable_key,
+        currency: this.credentials.default_currency,
+        stripeApiKeyLength: (this.stripe as any)._api?.auth?.length || 0,
+      });
+
       // For platform accounts, pass undefined as stripeAccountId
+      log.info("Retrieving or creating Stripe customer", {
+        stripeAccountId: this.credentials.stripe_user_id || "platform",
+        bookerEmail,
+      });
+
       const customer = await retrieveOrCreateStripeCustomerByEmail(
         this.credentials.stripe_user_id || "",
         bookerEmail,
         bookerPhoneNumber
       );
+
+      log.info("Stripe customer retrieved/created", {
+        customerId: customer.id,
+        email: customer.email,
+      });
 
       // Get booking details to check for Stripe metadata
       const booking = await prisma.booking.findUnique({
@@ -167,11 +198,20 @@ export class PaymentService implements IAbstractPaymentService {
         ? { stripeAccount: this.credentials.stripe_user_id }
         : undefined;
 
-      const session = await this.stripe.checkout.sessions.create(sessionParams, stripeOptions);
+      // Create payment record first with a unique ID
+      const paymentUid = uuidv4();
+      
+      log.info("Creating payment record", {
+        paymentUid,
+        bookingId,
+        amount: payment.amount,
+        currency: payment.currency,
+      });
 
+      // Create payment record with pending status
       const paymentData = await prisma.payment.create({
         data: {
-          uid: uuidv4(),
+          uid: paymentUid,
           app: {
             connect: {
               slug: "stripe",
@@ -184,10 +224,9 @@ export class PaymentService implements IAbstractPaymentService {
           },
           amount: payment.amount,
           currency: payment.currency,
-          externalId: session.id,
+          externalId: "", // Will be updated after session creation
           data: {
-            sessionId: session.id,
-            client_secret: (session as any).client_secret || "",
+            status: "pending",
             stripe_publishable_key: this.credentials.stripe_publishable_key,
             stripeAccount: this.credentials.stripe_user_id || null,
           } as Prisma.InputJsonValue,
@@ -197,10 +236,64 @@ export class PaymentService implements IAbstractPaymentService {
           paymentOption: paymentOption || "ON_BOOKING",
         },
       });
-      if (!paymentData) {
-        throw new Error();
+
+      log.info("Payment record created", {
+        paymentId: paymentData.id,
+        paymentUid: paymentData.uid,
+      });
+
+      try {
+        log.info("Creating Stripe checkout session with params", {
+          sessionParams: JSON.stringify(sessionParams),
+          stripeOptions: JSON.stringify(stripeOptions),
+        });
+
+        const session = await this.stripe.checkout.sessions.create(sessionParams, stripeOptions);
+
+        log.info("Stripe checkout session created successfully", {
+          sessionId: session.id,
+          clientSecret: !!(session as any).client_secret,
+          url: session.url,
+        });
+
+        // Update payment record with session details
+        const updatedPayment = await prisma.payment.update({
+          where: { id: paymentData.id },
+          data: {
+            externalId: session.id,
+            data: {
+              sessionId: session.id,
+              client_secret: (session as any).client_secret || "",
+              stripe_publishable_key: this.credentials.stripe_publishable_key,
+              stripeAccount: this.credentials.stripe_user_id || null,
+              status: "session_created",
+            } as Prisma.InputJsonValue,
+          },
+        });
+
+        return updatedPayment;
+      } catch (sessionError) {
+        log.error("Failed to create Stripe session, but payment record exists", {
+          paymentId: paymentData.id,
+          paymentUid: paymentData.uid,
+          error: sessionError,
+        });
+        
+        // Update payment record with error status
+        await prisma.payment.update({
+          where: { id: paymentData.id },
+          data: {
+            data: {
+              ...(paymentData.data as object),
+              status: "session_creation_failed",
+              error: sessionError instanceof Error ? sessionError.message : String(sessionError),
+            } as Prisma.InputJsonValue,
+          },
+        });
+
+        // Re-throw to maintain existing error flow, but payment record exists
+        throw sessionError;
       }
-      return paymentData;
     } catch (error) {
       // Enhanced error logging
       const errorDetails = {

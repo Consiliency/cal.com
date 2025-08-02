@@ -18,6 +18,28 @@ import type { LoadedUsers } from "./loadUsers";
 import type { OriginalRescheduledBooking } from "./originalRescheduledBookingUtils";
 import type { PaymentAppData, Tracking } from "./types";
 
+// Helper function to determine booking status based on payment requirements
+function getBookingStatus({
+  isConfirmedByDefault,
+  paymentAppData,
+}: {
+  isConfirmedByDefault: boolean;
+  paymentAppData: {
+    enabled?: boolean;
+    price?: number;
+  };
+}) {
+  // If payment is required (enabled and price > 0), always start as PENDING
+  const paymentRequired = paymentAppData.enabled && paymentAppData.price && paymentAppData.price > 0;
+  
+  if (paymentRequired) {
+    return BookingStatus.PENDING;
+  }
+  
+  // Otherwise, use the normal confirmation logic
+  return isConfirmedByDefault ? BookingStatus.ACCEPTED : BookingStatus.PENDING;
+}
+
 type ReqBodyWithEnd = TgetBookingDataSchema & { end: string };
 
 type CreateBookingParams = {
@@ -237,7 +259,10 @@ function buildNewBookingData(params: CreateBookingParams) {
     endTime: dayjs.utc(evt.endTime).toDate(),
     description: evt.seatsPerTimeSlot ? null : evt.additionalNotes,
     customInputs: isPrismaObjOrUndefined(evt.customInputs),
-    status: eventType.isConfirmedByDefault ? BookingStatus.ACCEPTED : BookingStatus.PENDING,
+    status: getBookingStatus({
+      isConfirmedByDefault: eventType.isConfirmedByDefault,
+      paymentAppData: eventType.paymentAppData,
+    }),
     oneTimePassword: evt.oneTimePassword,
     location: evt.location,
     eventType: eventTypeRel,
