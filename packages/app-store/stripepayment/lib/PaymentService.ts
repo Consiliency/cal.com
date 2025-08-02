@@ -22,9 +22,11 @@ import type { StripePaymentData, StripeSetupIntentData } from "./server";
 const log = logger.getSubLogger({ prefix: ["payment-service:stripe"] });
 
 export const stripeCredentialKeysSchema = z.object({
-  stripe_user_id: z.string(),
+  stripe_user_id: z.string().optional(),
   default_currency: z.string(),
   stripe_publishable_key: z.string(),
+  // For platform accounts using manual configuration
+  platform_secret_key: z.string().optional(),
 });
 
 const stripeAppKeysSchema = z.object({
@@ -44,7 +46,11 @@ export class PaymentService implements IAbstractPaymentService {
     } else {
       this.credentials = null;
     }
-    this.stripe = new Stripe(process.env.STRIPE_PRIVATE_KEY || "", {
+    
+    // Use platform secret key if available (manual configuration), otherwise use env variable
+    const stripeApiKey = this.credentials?.platform_secret_key || process.env.STRIPE_PRIVATE_KEY || "";
+    
+    this.stripe = new Stripe(stripeApiKey, {
       apiVersion: "2025-06-30.basil",
     });
   }
@@ -80,8 +86,9 @@ export class PaymentService implements IAbstractPaymentService {
         throw new Error("Stripe credentials not found");
       }
 
+      // For platform accounts, pass undefined as stripeAccountId
       const customer = await retrieveOrCreateStripeCustomerByEmail(
-        this.credentials.stripe_user_id,
+        this.credentials.stripe_user_id || "",
         bookerEmail,
         bookerPhoneNumber
       );
@@ -118,47 +125,49 @@ export class PaymentService implements IAbstractPaymentService {
       });
 
       // Create Embedded Checkout Session instead of Payment Intent
-      const session = await this.stripe.checkout.sessions.create(
-        {
-          mode: "payment",
-          ui_mode: "embedded",
-          customer: customer.id,
-          line_items: [
-            stripePriceId
-              ? {
-                  price: stripePriceId,
-                  quantity: 1,
-                }
-              : {
-                  price_data: {
-                    currency: payment.currency,
-                    product_data: {
-                      name: eventTitle || bookingTitle || "Booking",
-                    },
-                    unit_amount: payment.amount,
+      const sessionParams: Stripe.Checkout.SessionCreateParams = {
+        mode: "payment",
+        ui_mode: "embedded",
+        customer: customer.id,
+        line_items: [
+          stripePriceId
+            ? {
+                price: stripePriceId,
+                quantity: 1,
+              }
+            : {
+                price_data: {
+                  currency: payment.currency,
+                  product_data: {
+                    name: eventTitle || bookingTitle || "Booking",
                   },
-                  quantity: 1,
+                  unit_amount: payment.amount,
                 },
-          ],
-          allow_promotion_codes: true,
-          return_url: `${WEBAPP_URL}/api/booking/${bookingId}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
-          // cancel_url is not supported with ui_mode: "embedded"
-          metadata: {
-            identifier: "cal.com",
-            bookingId: bookingId.toString(),
-            calAccountId: userId ? userId.toString() : "",
-            calUsername: username || "",
-            bookerName,
-            bookerEmail,
-            bookerPhoneNumber: bookerPhoneNumber || "",
-            eventTitle: eventTitle || "",
-            bookingTitle: bookingTitle || "",
-          },
+                quantity: 1,
+              },
+        ],
+        allow_promotion_codes: true,
+        return_url: `${WEBAPP_URL}/api/booking/${bookingId}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+        // cancel_url is not supported with ui_mode: "embedded"
+        metadata: {
+          identifier: "cal.com",
+          bookingId: bookingId.toString(),
+          calAccountId: userId ? userId.toString() : "",
+          calUsername: username || "",
+          bookerName,
+          bookerEmail,
+          bookerPhoneNumber: bookerPhoneNumber || "",
+          eventTitle: eventTitle || "",
+          bookingTitle: bookingTitle || "",
         },
-        {
-          stripeAccount: this.credentials.stripe_user_id,
-        }
-      );
+      };
+
+      // Only pass stripeAccount for connected accounts, not for platform accounts
+      const stripeOptions = this.credentials.stripe_user_id 
+        ? { stripeAccount: this.credentials.stripe_user_id }
+        : undefined;
+
+      const session = await this.stripe.checkout.sessions.create(sessionParams, stripeOptions);
 
       const paymentData = await prisma.payment.create({
         data: {
@@ -180,7 +189,7 @@ export class PaymentService implements IAbstractPaymentService {
             sessionId: session.id,
             client_secret: (session as any).client_secret || "",
             stripe_publishable_key: this.credentials.stripe_publishable_key,
-            stripeAccount: this.credentials.stripe_user_id,
+            stripeAccount: this.credentials.stripe_user_id || null,
           } as Prisma.InputJsonValue,
           fee: 0,
           refunded: false,
@@ -247,8 +256,9 @@ export class PaymentService implements IAbstractPaymentService {
         throw new Error("Payment option is not compatible with create method");
       }
 
+      // For platform accounts, pass undefined as stripeAccountId
       const customer = await retrieveOrCreateStripeCustomerByEmail(
-        this.credentials.stripe_user_id,
+        this.credentials.stripe_user_id || "",
         bookerEmail,
         bookerPhoneNumber
       );
@@ -262,9 +272,12 @@ export class PaymentService implements IAbstractPaymentService {
         },
       };
 
-      const setupIntent = await this.stripe.setupIntents.create(params, {
-        stripeAccount: this.credentials.stripe_user_id,
-      });
+      // Only pass stripeAccount for connected accounts
+      const stripeOptions = this.credentials.stripe_user_id 
+        ? { stripeAccount: this.credentials.stripe_user_id }
+        : undefined;
+      
+      const setupIntent = await this.stripe.setupIntents.create(params, stripeOptions);
 
       const paymentData = await prisma.payment.create({
         data: {
@@ -287,7 +300,7 @@ export class PaymentService implements IAbstractPaymentService {
             {
               setupIntent,
               stripe_publishable_key: this.credentials.stripe_publishable_key,
-              stripeAccount: this.credentials.stripe_user_id,
+              stripeAccount: this.credentials.stripe_user_id || null,
             }
           ) as unknown as Prisma.InputJsonValue,
           fee: 0,
@@ -333,12 +346,12 @@ export class PaymentService implements IAbstractPaymentService {
       const paymentFee = Math.round(payment.amount * payment_fee_percentage + payment_fee_fixed);
 
       // Ensure that the stripe customer & payment method still exists
-      const customer = await this.stripe.customers.retrieve(setupIntent.customer as string, {
-        stripeAccount: this.credentials.stripe_user_id,
-      });
-      const paymentMethod = await this.stripe.paymentMethods.retrieve(setupIntent.payment_method as string, {
-        stripeAccount: this.credentials.stripe_user_id,
-      });
+      const stripeRetrieveOptions = this.credentials.stripe_user_id 
+        ? { stripeAccount: this.credentials.stripe_user_id }
+        : undefined;
+        
+      const customer = await this.stripe.customers.retrieve(setupIntent.customer as string, stripeRetrieveOptions);
+      const paymentMethod = await this.stripe.paymentMethods.retrieve(setupIntent.payment_method as string, stripeRetrieveOptions);
 
       if (!customer) {
         throw new Error(`Stripe customer does not exist for setupIntent ${setupIntent.id}`);
@@ -358,9 +371,11 @@ export class PaymentService implements IAbstractPaymentService {
         confirm: true,
       };
 
-      const paymentIntent = await this.stripe.paymentIntents.create(params, {
-        stripeAccount: this.credentials.stripe_user_id,
-      });
+      const paymentIntentOptions = this.credentials.stripe_user_id 
+        ? { stripeAccount: this.credentials.stripe_user_id }
+        : undefined;
+        
+      const paymentIntent = await this.stripe.paymentIntents.create(params, paymentIntentOptions);
 
       const paymentData = await prisma.payment.update({
         where: {
@@ -401,7 +416,8 @@ export class PaymentService implements IAbstractPaymentService {
       const stripeAccount = (payment.data as unknown as StripePaymentData)["stripeAccount"];
 
       // For checkout sessions, we need to get the payment intent ID first
-      const session = await this.stripe.checkout.sessions.retrieve(payment.externalId, { stripeAccount });
+      const sessionOptions = stripeAccount ? { stripeAccount } : undefined;
+      const session = await this.stripe.checkout.sessions.retrieve(payment.externalId, sessionOptions);
 
       if (!session.payment_intent) {
         throw new Error("No payment intent found for session");
@@ -411,7 +427,7 @@ export class PaymentService implements IAbstractPaymentService {
         {
           payment_intent: session.payment_intent as string,
         },
-        { stripeAccount }
+        sessionOptions
       );
 
       if (!refund || refund.status === "failed") {
@@ -475,13 +491,10 @@ export class PaymentService implements IAbstractPaymentService {
       });
       const stripeAccount = (payment.data as unknown as StripePaymentData).stripeAccount;
 
-      if (!stripeAccount) {
-        throw new Error("Stripe account not found");
-      }
-
       // For checkout sessions, we need to expire the session
       try {
-        await this.stripe.checkout.sessions.expire(payment.externalId, { stripeAccount });
+        const expireOptions = stripeAccount ? { stripeAccount } : undefined;
+        await this.stripe.checkout.sessions.expire(payment.externalId, expireOptions);
       } catch (e) {
         // If it's already expired or completed, that's fine
         log.info("Session may already be expired or completed", payment.externalId);

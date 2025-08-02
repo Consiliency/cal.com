@@ -88,14 +88,15 @@ export async function retrieveOrCreateStripeCustomerByEmail(
   email: string,
   phoneNumber?: string | null
 ) {
+  // For platform accounts (empty stripeAccountId), don't pass stripeAccount option
+  const stripeOptions = stripeAccountId ? { stripeAccount: stripeAccountId } : undefined;
+  
   const customer = await stripe.customers.list(
     {
       email,
       limit: 1,
     },
-    {
-      stripeAccount: stripeAccountId,
-    }
+    stripeOptions
   );
 
   if (customer.data[0]?.id) {
@@ -103,9 +104,7 @@ export async function retrieveOrCreateStripeCustomerByEmail(
   } else {
     const newCustomer = await stripe.customers.create(
       { email, phone: phoneNumber ?? undefined },
-      {
-        stripeAccount: stripeAccountId,
-      }
+      stripeOptions
     );
     return newCustomer;
   }

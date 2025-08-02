@@ -1978,9 +1978,45 @@ async function handler(
         },
       },
     });
-    const eventTypePaymentAppCredential = credentialPaymentAppCategories.find((credential) => {
+    let eventTypePaymentAppCredential = credentialPaymentAppCategories.find((credential) => {
       return credential.appId === paymentAppData.appId;
     });
+
+    // If no user credentials found, check for manual Stripe configuration
+    if (!eventTypePaymentAppCredential && paymentAppData.appId === "stripe") {
+      loggerWithEventDetails.debug("No user credentials found, checking for manual Stripe configuration");
+      
+      const stripeApp = await prisma.app.findFirst({
+        where: { slug: "stripe" },
+        select: { keys: true }
+      });
+
+      if (stripeApp?.keys && typeof stripeApp.keys === "object") {
+        const appKeys = stripeApp.keys as { client_secret?: string; public_key?: string };
+        
+        if (appKeys.client_secret && appKeys.public_key) {
+          loggerWithEventDetails.debug("Found manual Stripe configuration, creating virtual credential");
+          
+          // Create a virtual credential for manual configuration
+          // Transform app keys to match the expected credential format
+          eventTypePaymentAppCredential = {
+            key: {
+              // For platform accounts, we don't have a stripe_user_id
+              // The PaymentService will use the platform account when stripe_user_id is missing
+              stripe_publishable_key: appKeys.public_key,
+              default_currency: "usd", // Default currency for platform accounts
+              // Include the secret key for platform account usage
+              platform_secret_key: appKeys.client_secret
+            } as any,
+            appId: "stripe",
+            app: {
+              categories: ["payment" as any],
+              dirName: "stripepayment"
+            }
+          };
+        }
+      }
+    }
 
     if (!eventTypePaymentAppCredential) {
       throw new HttpError({ statusCode: 400, message: "Missing payment credentials" });
